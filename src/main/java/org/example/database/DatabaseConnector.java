@@ -1,17 +1,14 @@
 package org.example.database;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public class DatabaseService {
+public class DatabaseConnector {
 
     private DataSource dataSource;
 
-    public DatabaseService(DataSource dataSource) {
+    public DatabaseConnector(DataSource dataSource) {
         this.dataSource = dataSource;
 
     }

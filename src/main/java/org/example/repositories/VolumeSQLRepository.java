@@ -1,43 +1,20 @@
 package org.example.repositories;
 
-import org.example.database.DatabaseService;
+import org.example.database.DatabaseConnector;
 import org.example.interfaces.CrudRepository;
 import org.example.interfaces.QuerySpecification;
-import org.example.models.User;
 import org.example.models.Volume;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class VolumeRepository implements CrudRepository<Volume, Long> {
+public class VolumeSQLRepository implements CrudRepository<Volume> {
 
-    private DatabaseService databaseService;
+    private DatabaseConnector databaseConnector;
 
-    public VolumeRepository(DatabaseService databaseService) {
-        this.databaseService = databaseService;
-    }
-
-    @Override
-    public Volume getById(Long id) {
-        String query = "SELECT * FROM volume WHERE id = ?";
-
-        try(Connection connection = databaseService.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-
-            preparedStatement.setLong(1, id);
-            ResultSet result = preparedStatement.executeQuery();
-
-            if (result.next()) {
-                return new Volume(result.getLong("id"),
-                        result.getDouble("vol"));
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return null;
+    public VolumeSQLRepository(DatabaseConnector databaseConnector) {
+        this.databaseConnector = databaseConnector;
     }
 
     @Override
@@ -47,7 +24,7 @@ public class VolumeRepository implements CrudRepository<Volume, Long> {
                        (?)
                        """;
 
-        try(Connection connection = databaseService.getConnection();
+        try(Connection connection = databaseConnector.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
             preparedStatement.setDouble(1, object.getVolume());
@@ -63,11 +40,11 @@ public class VolumeRepository implements CrudRepository<Volume, Long> {
     @Override
     public void update(Volume object) {
         String query = """
-                update volume set vol = ?,
+                update volume set vol = ?
                 where id = ?
                 """;
 
-        try(Connection connection = databaseService.getConnection();
+        try(Connection connection = databaseConnector.getConnection();
             PreparedStatement statement = connection.prepareStatement(query)){
 
             statement.setDouble(1, object.getVolume());
@@ -81,16 +58,12 @@ public class VolumeRepository implements CrudRepository<Volume, Long> {
     }
 
     @Override
-    public void delete(Long id) {
-        String query = """
-                        delete from volume
-                        where id = ?
-                       """;
+    public void delete(QuerySpecification spec) {
+        String query = "delete from volume where " + spec.toSQLClauses();
 
-        try(Connection connection = databaseService.getConnection();
+        try(Connection connection = databaseConnector.getConnection();
             PreparedStatement statement = connection.prepareStatement(query)) {
 
-            statement.setLong(1, id);
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -101,7 +74,7 @@ public class VolumeRepository implements CrudRepository<Volume, Long> {
     public List<Volume> query(QuerySpecification spec) {
         String query = "select * from volume where " + spec.toSQLClauses();
 
-        try(Connection connection = databaseService.getConnection();
+        try(Connection connection = databaseConnector.getConnection();
             PreparedStatement statement = connection.prepareStatement(query)) {
 
             ResultSet resultSet = statement.executeQuery();
@@ -112,7 +85,7 @@ public class VolumeRepository implements CrudRepository<Volume, Long> {
 
                 resultList.add(new Volume(id, vol));
             }
-
+            resultSet.close();
             return resultList;
 
         } catch (SQLException e) {

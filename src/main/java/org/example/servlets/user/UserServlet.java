@@ -1,4 +1,4 @@
-package org.example;
+package org.example.servlets.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletConfig;
@@ -6,82 +6,98 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.example.database.DatabaseService;
+import org.example.database.DatabaseConnector;
+import org.example.interfaces.CrudRepository;
 import org.example.interfaces.ModelParser;
 import org.example.interfaces.ModelValidator;
-import org.example.models.Catalog;
+import org.example.interfaces.QuerySpecification;
 import org.example.models.User;
 import org.example.parsers.JsonModelParser;
 import org.example.parsers.PathParser;
 import org.example.parsers.RequestBodyParser;
-import org.example.repositories.UserRepository;
+import org.example.repositories.UserSQLRepository;
+import org.example.responses.ErrorJsonResponse;
+import org.example.specifications.user.UserByIdSpecification;
 import org.example.validators.UserValidator;
-import org.postgresql.util.PSQLException;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
+import java.time.Period;
+import java.util.List;
 
 public class UserServlet extends HttpServlet {
 
-    private UserRepository userRepository;
+    private CrudRepository<User> userRepository;
     private ModelParser<User> userParser;
+    private ModelValidator<User> userValidator;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        DatabaseService databaseService = (DatabaseService) getServletContext().getAttribute("dbService");
-        this.userRepository = new UserRepository(databaseService);
+        DatabaseConnector databaseConnector = (DatabaseConnector) getServletContext().getAttribute("dbService");
+        this.userRepository = new UserSQLRepository(databaseConnector);
         this.userParser = new JsonModelParser<>(User.class);
+        this.userValidator = new UserValidator();
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json");
-
-        ObjectMapper objectMapper = new ObjectMapper();
         PathParser parser = new PathParser(req.getPathInfo());
+        ObjectMapper jsonMapper = new ObjectMapper();
+        PrintWriter writer = resp.getWriter();
 
         Long id = parser.parseLong(1);
         if(id == null) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            writer.write(ErrorJsonResponse.CHECK_INPUT_DATA.getJsonMessage());
+            writer.close();
             return;
         }
 
-        User user = userRepository.getById(id);
-        if(user == null){
+        QuerySpecification specification = new UserByIdSpecification(id);
+        List<User> result = userRepository.query(specification);
+
+        if(result.isEmpty()){
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            writer.write(ErrorJsonResponse.NOT_FOUND.getJsonMessage());
+            writer.close();
             return;
         }
 
-        PrintWriter writer = resp.getWriter();
-        writer.write(objectMapper.writeValueAsString(user));
+        writer.write(jsonMapper.writeValueAsString(result));
         writer.close();
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        resp.setContentType("application/json");
         String requestBody = RequestBodyParser.readBody(req);
         User newUser = userParser.parse(requestBody);
-        ModelValidator<User> validator = new UserValidator();
 
-        if(!validator.validate(newUser)){
+        if(!userValidator.validate(newUser)){
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            PrintWriter writer = resp.getWriter();
+            writer.write(ErrorJsonResponse.MODEL_NOT_FULL.getJsonMessage());
+            writer.close();
             return;
         }
 
         userRepository.save(newUser);
+        resp.setStatus(HttpServletResponse.SC_CREATED);
     }
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        resp.setContentType("application/json");
         String requestBody = RequestBodyParser.readBody(req);
         User updateUser = userParser.parse(requestBody);
-        ModelValidator<User> validator = new UserValidator();
 
-        if(!validator.validate(updateUser)){
+        if(!userValidator.validate(updateUser)){
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            PrintWriter writer = resp.getWriter();
+            writer.write(ErrorJsonResponse.MODEL_NOT_FULL.getJsonMessage());
+            writer.close();
             return;
         }
 
@@ -90,15 +106,20 @@ public class UserServlet extends HttpServlet {
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        resp.setContentType("application/json");
         PathParser parser = new PathParser(req.getPathInfo());
-        Long parsedId = parser.parseLong(1);
+        Long id = parser.parseLong(1);
 
-        if(parsedId == null){
+        if(id == null){
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            PrintWriter writer = resp.getWriter();
+            writer.write(ErrorJsonResponse.CHECK_INPUT_DATA.getJsonMessage());
+            writer.close();
             return;
         }
 
-        userRepository.delete(parsedId);
-        resp.setStatus(HttpServletResponse.SC_OK);
+        QuerySpecification specification = new UserByIdSpecification(id);
+
+        userRepository.delete(specification);
     }
 }

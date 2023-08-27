@@ -1,6 +1,6 @@
 package org.example.repositories;
 
-import org.example.database.DatabaseService;
+import org.example.database.DatabaseConnector;
 import org.example.interfaces.CrudRepository;
 import org.example.interfaces.QuerySpecification;
 import org.example.models.User;
@@ -8,38 +8,13 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserRepository implements CrudRepository<User, Long> {
+public class UserSQLRepository implements CrudRepository<User> {
 
-    private final DatabaseService databaseService;
+    private final DatabaseConnector databaseConnector;
 
-    public UserRepository(DatabaseService databaseService) {
-        this.databaseService = databaseService;
+    public UserSQLRepository(DatabaseConnector databaseConnector) {
+        this.databaseConnector = databaseConnector;
 
-    }
-
-    @Override
-    public User getById(Long id) {
-        String query = "SELECT * FROM users WHERE id = ?";
-
-        try(Connection connection = databaseService.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-
-            preparedStatement.setLong(1, id);
-            ResultSet result = preparedStatement.executeQuery();
-            if (result.next()) {
-                return new User(result.getLong("id"),
-                        result.getString("name"),
-                        result.getString("surname"),
-                        result.getString("father_name"),
-                        result.getDate("dob"),
-                        result.getString("sex"));
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return null;
     }
 
     @Override
@@ -49,7 +24,7 @@ public class UserRepository implements CrudRepository<User, Long> {
                        (?, ?, ?, ?, ?)
                        """;
 
-        try(Connection connection = databaseService.getConnection();
+        try(Connection connection = databaseConnector.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
             preparedStatement.setString(1, object.getName());
@@ -77,7 +52,7 @@ public class UserRepository implements CrudRepository<User, Long> {
                 where id = ?
                 """;
 
-        try(Connection connection = databaseService.getConnection();
+        try(Connection connection = databaseConnector.getConnection();
             PreparedStatement statement = connection.prepareStatement(query)){
 
             statement.setString(1, object.getName());
@@ -95,16 +70,12 @@ public class UserRepository implements CrudRepository<User, Long> {
     }
 
     @Override
-    public void delete(Long id) {
-        String query = """
-                        delete from users
-                        where id = ?
-                       """;
+    public void delete(QuerySpecification spec) {
+        String query = "delete from users where " + spec.toSQLClauses();
 
-        try(Connection connection = databaseService.getConnection();
+        try(Connection connection = databaseConnector.getConnection();
             PreparedStatement statement = connection.prepareStatement(query)) {
 
-            statement.setLong(1, id);
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -115,7 +86,7 @@ public class UserRepository implements CrudRepository<User, Long> {
     public List<User> query(QuerySpecification spec) {
         String query = "select * from users where " + spec.toSQLClauses();
 
-        try(Connection connection = databaseService.getConnection();
+        try(Connection connection = databaseConnector.getConnection();
             PreparedStatement statement = connection.prepareStatement(query)) {
 
             ResultSet resultSet = statement.executeQuery();
@@ -130,7 +101,7 @@ public class UserRepository implements CrudRepository<User, Long> {
 
                 resultList.add(new User(id, name, surname, father_name, dob, sex));
             }
-
+            resultSet.close();
             return resultList;
 
         } catch (SQLException e) {

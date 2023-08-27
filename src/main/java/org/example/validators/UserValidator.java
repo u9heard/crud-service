@@ -57,6 +57,6 @@ public class UserValidator implements ModelValidator<User> {
     }
 
     private boolean validateSex(User user){
-        return user.getSex() != null && !user.getSex().isEmpty();
+        return user.getSex() != null && !user.getSex().isEmpty() && (user.getSex().equals("Male") || user.getSex().equals("Female"));
     }
 }

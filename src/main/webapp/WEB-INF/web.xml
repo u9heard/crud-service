@@ -28,12 +28,41 @@
 
   <servlet>
     <servlet-name>UserServlet</servlet-name>
-    <servlet-class>org.example.UserServlet</servlet-class>
+    <servlet-class>org.example.servlets.user.UserServlet</servlet-class>
   </servlet>
   <servlet>
     <servlet-name>CatalogServlet</servlet-name>
-    <servlet-class>org.example.CatalogServlet</servlet-class>
+    <servlet-class>org.example.servlets.catalog.CatalogServlet</servlet-class>
   </servlet>
+  <servlet>
+    <servlet-name>VolumeServlet</servlet-name>
+    <servlet-class>org.example.servlets.volume.VolumeServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>CatalogBrandServlet</servlet-name>
+    <servlet-class>org.example.servlets.catalog.CatalogByBrandServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>ColorServlet</servlet-name>
+    <servlet-class>org.example.servlets.color.ColorServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>CarColorServlet</servlet-name>
+    <servlet-class>org.example.servlets.carcolor.CarColorServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>CarVolumeServlet</servlet-name>
+    <servlet-class>org.example.servlets.carvolume.CarVolumeServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>OrderServlet</servlet-name>
+    <servlet-class>org.example.servlets.order.OrderServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>OrderByUserServlet</servlet-name>
+    <servlet-class>org.example.servlets.order.OrderByUserServlet</servlet-class>
+  </servlet>
+
   <servlet-mapping>
     <servlet-name>UserServlet</servlet-name>
     <url-pattern>/user/*</url-pattern>
@@ -41,6 +70,34 @@
   <servlet-mapping>
     <servlet-name>CatalogServlet</servlet-name>
     <url-pattern>/catalog/*</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>VolumeServlet</servlet-name>
+    <url-pattern>/volume/*</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>CatalogBrandServlet</servlet-name>
+    <url-pattern>/catalog/brand/*</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>ColorServlet</servlet-name>
+    <url-pattern>/color/*</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>CarColorServlet</servlet-name>
+    <url-pattern>/carcolor/*</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>CarVolumeServlet</servlet-name>
+    <url-pattern>/carvolume/*</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>OrderServlet</servlet-name>
+    <url-pattern>/order/*</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>OrderByUserServlet</servlet-name>
+    <url-pattern>/order/user/*</url-pattern>
   </servlet-mapping>
 
 </web-app>
