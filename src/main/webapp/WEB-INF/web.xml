@@ -22,7 +22,7 @@
     <listener-class>liquibase.integration.servlet.LiquibaseJakartaServletListener</listener-class>
   </listener>
   <listener>
-    <listener-class>org.example.listeners.ContextListener</listener-class>
+    <listener-class>org.example.context.ContextListener</listener-class>
   </listener>
 
 

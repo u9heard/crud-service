@@ -12,6 +12,7 @@ import org.example.models.Catalog;
 import org.example.parsers.PathParser;
 import org.example.repositories.CatalogSQLRepository;
 import org.example.responses.ErrorJsonResponse;
+import org.example.services.CatalogService;
 import org.example.specifications.catalog.CatalogByBrandSpecification;
 
 import java.io.IOException;
@@ -20,12 +21,12 @@ import java.util.List;
 
 public class CatalogByBrandServlet extends HttpServlet {
 
-    private CrudRepository<Catalog> catalogRepository;
+    private CatalogService catalogService;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        this.catalogRepository = new CatalogSQLRepository((DatabaseConnector) getServletContext().getAttribute("dbService"));
+        this.catalogService = (CatalogService) getServletContext().getAttribute("catalogService");
     }
 
     @Override
@@ -44,7 +45,7 @@ public class CatalogByBrandServlet extends HttpServlet {
             return;
         }
 
-        List<Catalog> result = catalogRepository.query(new CatalogByBrandSpecification(brand));
+        List<Catalog> result = catalogService.get(new CatalogByBrandSpecification(brand));
         if(result.isEmpty()){
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
             writer.write(ErrorJsonResponse.NOT_FOUND.getJsonMessage());

@@ -17,6 +17,8 @@ import org.example.parsers.PathParser;
 import org.example.parsers.RequestBodyParser;
 import org.example.repositories.VolumeSQLRepository;
 import org.example.responses.ErrorJsonResponse;
+import org.example.services.UserService;
+import org.example.services.VolumeService;
 import org.example.specifications.volume.VolumeByIdSpecification;
 import org.example.validators.VolumeValidator;
 
@@ -26,7 +28,7 @@ import java.util.List;
 
 public class VolumeServlet extends HttpServlet {
 
-    private CrudRepository<Volume> volumeRepository;
+    private VolumeService volumeService;
     private ModelParser<Volume> volumeParser;
     private ModelValidator<Volume> volumeValidator;
 
@@ -34,7 +36,7 @@ public class VolumeServlet extends HttpServlet {
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
 
-        this.volumeRepository = new VolumeSQLRepository((DatabaseConnector) getServletContext().getAttribute("dbService"));
+        this.volumeService = (VolumeService) getServletContext().getAttribute("volumeService");
         this.volumeParser = new JsonModelParser<>(Volume.class);
         this.volumeValidator = new VolumeValidator();
     }
@@ -55,7 +57,7 @@ public class VolumeServlet extends HttpServlet {
 
         QuerySpecification specification = new VolumeByIdSpecification(id);
 
-        List<Volume> result = volumeRepository.query(specification);
+        List<Volume> result = volumeService.get(specification);
         if(result.isEmpty()){
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
             writer.write(ErrorJsonResponse.NOT_FOUND.getJsonMessage());
@@ -73,16 +75,23 @@ public class VolumeServlet extends HttpServlet {
         resp.setContentType("application/json");
         String requestBody = RequestBodyParser.readBody(req);
         Volume newVolume = volumeParser.parse(requestBody);
+        PrintWriter writer = resp.getWriter();
 
         if(!volumeValidator.validate(newVolume)){
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            PrintWriter writer = resp.getWriter();
             writer.write(ErrorJsonResponse.MODEL_NOT_FULL.getJsonMessage());
             writer.close();
             return;
         }
 
-        volumeRepository.save(newVolume);
+        if(!volumeService.add(newVolume)){
+            resp.setStatus(HttpServletResponse.SC_CONFLICT);
+            writer.write(ErrorJsonResponse.UNIQUE_CHECK_ERROR.getJsonMessage());
+            writer.close();
+            return;
+        }
+
+        writer.close();
         resp.setStatus(HttpServletResponse.SC_CREATED);
     }
 
@@ -91,16 +100,23 @@ public class VolumeServlet extends HttpServlet {
         resp.setContentType("application/json");
         String requestBody = RequestBodyParser.readBody(req);
         Volume updateVolume = volumeParser.parse(requestBody);
+        PrintWriter writer = resp.getWriter();
 
         if(!volumeValidator.validate(updateVolume)){
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            PrintWriter writer = resp.getWriter();
             writer.write(ErrorJsonResponse.MODEL_NOT_FULL.getJsonMessage());
             writer.close();
             return;
         }
 
-        volumeRepository.update(updateVolume);
+        if(!volumeService.update(updateVolume)){
+            resp.setStatus(HttpServletResponse.SC_CONFLICT);
+            writer.write(ErrorJsonResponse.UNIQUE_CHECK_ERROR.getJsonMessage());
+            writer.close();
+            return;
+        }
+
+        writer.close();
     }
 
     @Override
@@ -118,6 +134,6 @@ public class VolumeServlet extends HttpServlet {
 
         QuerySpecification specification = new VolumeByIdSpecification(id);
 
-        volumeRepository.delete(specification);
+        volumeService.delete(specification);
     }
 }

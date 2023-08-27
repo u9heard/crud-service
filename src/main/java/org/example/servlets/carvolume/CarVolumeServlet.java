@@ -38,8 +38,8 @@ public class CarVolumeServlet extends HttpServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        DatabaseConnector connector = (DatabaseConnector) getServletContext().getAttribute("dbService");
-        this.carVolumeService = new CarVolumeService(new CatalogSQLRepository(connector), new VolumeSQLRepository(connector), new CarVolumeSQLRepository(connector));
+
+        this.carVolumeService = (CarVolumeService) getServletContext().getAttribute("carvolumeService");
         this.carVolumeParser = new JsonModelParser<>(CarVolume.class);
         this.carVolumeValidator = new CarVolumeValidator();
     }
@@ -101,8 +101,13 @@ public class CarVolumeServlet extends HttpServlet {
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json");
-        Long id_car = Long.getLong(req.getParameter("idCar"));
-        Long id_volume = Long.getLong(req.getParameter("idVolume"));
+        Long id_car = null;
+        Long id_volume = null;
+
+        try {
+            id_car = Long.parseLong(req.getParameter("idCar"));
+            id_volume = Long.parseLong(req.getParameter("idVolume"));
+        } catch (NumberFormatException ignored) {}
 
         if(id_car == null || id_volume == null){
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);

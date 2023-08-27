@@ -17,6 +17,7 @@ import org.example.parsers.PathParser;
 import org.example.parsers.RequestBodyParser;
 import org.example.repositories.UserSQLRepository;
 import org.example.responses.ErrorJsonResponse;
+import org.example.services.UserService;
 import org.example.specifications.user.UserByIdSpecification;
 import org.example.validators.UserValidator;
 
@@ -27,15 +28,14 @@ import java.util.List;
 
 public class UserServlet extends HttpServlet {
 
-    private CrudRepository<User> userRepository;
+    private UserService userService;
     private ModelParser<User> userParser;
     private ModelValidator<User> userValidator;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        DatabaseConnector databaseConnector = (DatabaseConnector) getServletContext().getAttribute("dbService");
-        this.userRepository = new UserSQLRepository(databaseConnector);
+        this.userService = (UserService) getServletContext().getAttribute("userService");
         this.userParser = new JsonModelParser<>(User.class);
         this.userValidator = new UserValidator();
     }
@@ -56,7 +56,7 @@ public class UserServlet extends HttpServlet {
         }
 
         QuerySpecification specification = new UserByIdSpecification(id);
-        List<User> result = userRepository.query(specification);
+        List<User> result = userService.get(specification);
 
         if(result.isEmpty()){
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -83,7 +83,7 @@ public class UserServlet extends HttpServlet {
             return;
         }
 
-        userRepository.save(newUser);
+        userService.add(newUser);
         resp.setStatus(HttpServletResponse.SC_CREATED);
     }
 
@@ -101,7 +101,7 @@ public class UserServlet extends HttpServlet {
             return;
         }
 
-        userRepository.update(updateUser);
+        userService.update(updateUser);
     }
 
     @Override
@@ -120,6 +120,6 @@ public class UserServlet extends HttpServlet {
 
         QuerySpecification specification = new UserByIdSpecification(id);
 
-        userRepository.delete(specification);
+        userService.delete(specification);
     }
 }

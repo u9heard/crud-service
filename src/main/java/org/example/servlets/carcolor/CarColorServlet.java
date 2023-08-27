@@ -38,8 +38,7 @@ public class CarColorServlet extends HttpServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        DatabaseConnector connector = (DatabaseConnector) getServletContext().getAttribute("dbService");
-        this.carColorService = new CarColorService(new CatalogSQLRepository(connector), new ColorSQLRepository(connector), new CarColorSQLRepository(connector));
+        this.carColorService = (CarColorService) getServletContext().getAttribute("carcolorService");
         this.carColorParser = new JsonModelParser<>(CarColor.class);
         this.carColorValidator = new CarColorValidator();
     }
@@ -100,9 +99,14 @@ public class CarColorServlet extends HttpServlet {
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json");
-        PathParser pathParser = new PathParser(req.getPathInfo());
-        Long id_car = Long.getLong(req.getParameter("idCar"));
-        Long id_color = Long.getLong(req.getParameter("idColor"));
+        Long id_car = null;
+        Long id_color = null;
+
+        try{
+            id_car = Long.parseLong(req.getParameter("idCar"));
+            id_color = Long.parseLong(req.getParameter("idColor"));
+        }
+        catch (NumberFormatException ignored){}
 
         if(id_car == null || id_color == null){
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);

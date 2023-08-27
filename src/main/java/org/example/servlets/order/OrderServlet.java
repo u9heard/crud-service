@@ -38,13 +38,8 @@ public class OrderServlet extends HttpServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        DatabaseConnector connector = (DatabaseConnector) getServletContext().getAttribute("dbService");
-        this.orderService = new OrderService(new UserSQLRepository(connector),
-                new CatalogSQLRepository(connector),
-                new CarColorSQLRepository(connector),
-                new CarVolumeSQLRepository(connector),
-                new OrderSQLRepository(connector));
 
+        this.orderService = (OrderService) getServletContext().getAttribute("orderService");
         this.orderParser = new JsonModelParser<>(Order.class);
         this.orderValidator = new OrderValidator();
     }

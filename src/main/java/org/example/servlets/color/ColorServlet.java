@@ -17,6 +17,7 @@ import org.example.parsers.PathParser;
 import org.example.parsers.RequestBodyParser;
 import org.example.repositories.ColorSQLRepository;
 import org.example.responses.ErrorJsonResponse;
+import org.example.services.ColorService;
 import org.example.specifications.color.ColorByIdSpecification;
 import org.example.validators.ColorValidator;
 
@@ -26,14 +27,14 @@ import java.util.List;
 
 public class ColorServlet extends HttpServlet {
 
-    private CrudRepository<Color> colorRepository;
+    private ColorService colorService;
     private ModelParser<Color> colorParser;
     private ModelValidator<Color> colorValidator;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        this.colorRepository = new ColorSQLRepository((DatabaseConnector) getServletContext().getAttribute("dbService"));
+        this.colorService = (ColorService) getServletContext().getAttribute("colorService");
         this.colorParser = new JsonModelParser<>(Color.class);
         this.colorValidator = new ColorValidator();
     }
@@ -55,7 +56,7 @@ public class ColorServlet extends HttpServlet {
 
         QuerySpecification specification = new ColorByIdSpecification(id);
 
-        List<Color> result = colorRepository.query(specification);
+        List<Color> result = colorService.get(specification);
         if(result.isEmpty()){
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
             writer.write(ErrorJsonResponse.NOT_FOUND.getJsonMessage());
@@ -73,16 +74,24 @@ public class ColorServlet extends HttpServlet {
         resp.setContentType("application/json");
         String requestBody = RequestBodyParser.readBody(req);
         Color newColor = colorParser.parse(requestBody);
+        PrintWriter writer = resp.getWriter();
 
         if(!colorValidator.validate(newColor)){
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            PrintWriter writer = resp.getWriter();
             writer.write(ErrorJsonResponse.MODEL_NOT_FULL.getJsonMessage());
             writer.close();
             return;
         }
 
-        colorRepository.save(newColor);
+        if(!colorService.add(newColor)){
+            resp.setStatus(HttpServletResponse.SC_CONFLICT);
+            writer.write(ErrorJsonResponse.UNIQUE_CHECK_ERROR.getJsonMessage());
+            writer.close();
+            return;
+        }
+
+        writer.close();
+        resp.setStatus(HttpServletResponse.SC_CREATED);
     }
 
     @Override
@@ -90,16 +99,23 @@ public class ColorServlet extends HttpServlet {
         resp.setContentType("application/json");
         String requestBody = RequestBodyParser.readBody(req);
         Color updateColor = colorParser.parse(requestBody);
+        PrintWriter writer = resp.getWriter();
 
         if(!colorValidator.validate(updateColor)){
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            PrintWriter writer = resp.getWriter();
             writer.write(ErrorJsonResponse.MODEL_NOT_FULL.getJsonMessage());
             writer.close();
             return;
         }
 
-        colorRepository.update(updateColor);
+        if(!colorService.update(updateColor)){
+            resp.setStatus(HttpServletResponse.SC_CONFLICT);
+            writer.write(ErrorJsonResponse.UNIQUE_CHECK_ERROR.getJsonMessage());
+            writer.close();
+            return;
+        }
+
+        writer.close();
     }
 
     @Override
@@ -117,6 +133,6 @@ public class ColorServlet extends HttpServlet {
 
         QuerySpecification specification = new ColorByIdSpecification(id);
 
-        colorRepository.delete(specification);
+        colorService.delete(specification);
     }
 }

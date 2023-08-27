@@ -34,8 +34,8 @@ public class CatalogServlet extends HttpServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        DatabaseConnector connector = (DatabaseConnector) getServletContext().getAttribute("dbService");
-        this.catalogService = new CatalogService(new CatalogSQLRepository(connector));
+
+        this.catalogService = (CatalogService) getServletContext().getAttribute("catalogService");
         this.catalogParser = new JsonModelParser<>(Catalog.class);
         this.catalogValidator = new CatalogValidator();
     }
