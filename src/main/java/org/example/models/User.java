@@ -1,6 +1,6 @@
 package org.example.models;
 
-import java.sql.Date;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 
 public class User {
@@ -8,13 +8,14 @@ public class User {
     private String name;
     private String surname;
     private String father_name;
-    private Date dob;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate dob;
     private String sex;
 
     public User(){
         this.id = 0L;
     }
-    public User(Long id, String name, String surname, String father_name, Date DOB, String sex) {
+    public User(Long id, String name, String surname, String father_name, LocalDate DOB, String sex) {
         this.id = id;
         this.name = name;
         this.surname = surname;
@@ -55,11 +56,11 @@ public class User {
         this.father_name = father_name;
     }
 
-    public Date getDob() {
+    public LocalDate getDob() {
         return dob;
     }
 
-    public void setDob(Date dob) {
+    public void setDob(LocalDate dob) {
         this.dob = dob;
     }
 

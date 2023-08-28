@@ -1,33 +1,26 @@
 package org.example.servlets.order;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.example.database.DatabaseConnector;
-import org.example.interfaces.CrudRepository;
 import org.example.interfaces.ModelParser;
 import org.example.interfaces.ModelValidator;
 import org.example.interfaces.QuerySpecification;
-import org.example.models.CarColor;
-import org.example.models.Catalog;
 import org.example.models.Order;
 import org.example.parsers.JsonModelParser;
 import org.example.parsers.PathParser;
 import org.example.parsers.RequestBodyParser;
-import org.example.repositories.*;
 import org.example.responses.ErrorJsonResponse;
 import org.example.services.OrderService;
-import org.example.specifications.catalog.CatalogByIdSpecification;
 import org.example.specifications.order.OrderByIdSpecification;
-import org.example.validators.CatalogValidator;
 import org.example.validators.OrderValidator;
-
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class OrderServlet extends HttpServlet {
 
@@ -48,7 +41,6 @@ public class OrderServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json");
         PathParser parser = new PathParser(req.getPathInfo());
-        ObjectMapper mapper = new ObjectMapper();
         PrintWriter writer = resp.getWriter();
 
         Long id = parser.parseLong(1);
@@ -68,7 +60,10 @@ public class OrderServlet extends HttpServlet {
             return;
         }
 
-        writer.write(mapper.writeValueAsString(result));
+        Map<String, List<Order>> resultMap = new HashMap<>();
+        resultMap.put("orders", result);
+
+        writer.write(orderParser.toJSON(resultMap));
         writer.close();
     }
 
@@ -76,7 +71,7 @@ public class OrderServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json");
         String requestBody = RequestBodyParser.readBody(req);
-        Order newOrder = orderParser.parse(requestBody);
+        Order newOrder = orderParser.toModel(requestBody);
         PrintWriter writer = resp.getWriter();
 
         if(!orderValidator.validate(newOrder)){
@@ -100,7 +95,7 @@ public class OrderServlet extends HttpServlet {
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json");
         String requestBody = RequestBodyParser.readBody(req);
-        Order updateOrder = orderParser.parse(requestBody);
+        Order updateOrder = orderParser.toModel(requestBody);
         PrintWriter writer = resp.getWriter();
 
         if(!orderValidator.validate(updateOrder)){

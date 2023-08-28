@@ -6,11 +6,12 @@ import org.example.interfaces.QuerySpecification;
 import org.example.models.Order;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 public class OrderSQLRepository implements CrudRepository<Order> {
-    private DatabaseConnector databaseConnector;
+    private final DatabaseConnector databaseConnector;
 
     public OrderSQLRepository(DatabaseConnector databaseConnector) {
         this.databaseConnector = databaseConnector;
@@ -30,7 +31,7 @@ public class OrderSQLRepository implements CrudRepository<Order> {
             preparedStatement.setLong(2, object.getIdCar());
             preparedStatement.setLong(3, object.getIdColor());
             preparedStatement.setLong(4, object.getIdVolume());
-            preparedStatement.setDate(5, object.getDateBuy());
+            preparedStatement.setDate(5, new Date(object.getDateBuy().toEpochDay()));
 
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
@@ -56,7 +57,7 @@ public class OrderSQLRepository implements CrudRepository<Order> {
             statement.setLong(2, object.getIdCar());
             statement.setLong(3, object.getIdColor());
             statement.setLong(4, object.getIdVolume());
-            statement.setDate(5, object.getDateBuy());
+            statement.setDate(5, new Date(object.getDateBuy().toEpochDay()));
             statement.setLong(6, object.getId());
 
             statement.executeUpdate();
@@ -93,8 +94,7 @@ public class OrderSQLRepository implements CrudRepository<Order> {
                 Long id_car = resultSet.getLong("id_car");
                 Long id_color = resultSet.getLong("id_color");
                 Long id_vol = resultSet.getLong("id_vol");
-                Date date_buy = resultSet.getDate("date_buy");
-
+                LocalDate date_buy = resultSet.getDate("date_buy").toLocalDate();
                 resultList.add(new Order(id, id_user, id_car, id_vol, id_color, date_buy));
             }
             resultSet.close();

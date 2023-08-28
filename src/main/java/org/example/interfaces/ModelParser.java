@@ -1,5 +1,6 @@
 package org.example.interfaces;
 
 public interface ModelParser<T> {
-    T parse(String textModel);
+    T toModel(String textModel);
+    String toJSON(Object object);
 }

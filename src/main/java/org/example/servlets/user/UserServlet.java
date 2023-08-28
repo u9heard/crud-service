@@ -1,13 +1,11 @@
 package org.example.servlets.user;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.example.database.DatabaseConnector;
-import org.example.interfaces.CrudRepository;
 import org.example.interfaces.ModelParser;
 import org.example.interfaces.ModelValidator;
 import org.example.interfaces.QuerySpecification;
@@ -15,16 +13,15 @@ import org.example.models.User;
 import org.example.parsers.JsonModelParser;
 import org.example.parsers.PathParser;
 import org.example.parsers.RequestBodyParser;
-import org.example.repositories.UserSQLRepository;
 import org.example.responses.ErrorJsonResponse;
 import org.example.services.UserService;
 import org.example.specifications.user.UserByIdSpecification;
 import org.example.validators.UserValidator;
-
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.time.Period;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class UserServlet extends HttpServlet {
 
@@ -44,7 +41,6 @@ public class UserServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json");
         PathParser parser = new PathParser(req.getPathInfo());
-        ObjectMapper jsonMapper = new ObjectMapper();
         PrintWriter writer = resp.getWriter();
 
         Long id = parser.parseLong(1);
@@ -56,16 +52,19 @@ public class UserServlet extends HttpServlet {
         }
 
         QuerySpecification specification = new UserByIdSpecification(id);
-        List<User> result = userService.get(specification);
+        List<User> resultList = userService.get(specification);
 
-        if(result.isEmpty()){
+        if(resultList.isEmpty()){
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
             writer.write(ErrorJsonResponse.NOT_FOUND.getJsonMessage());
             writer.close();
             return;
         }
 
-        writer.write(jsonMapper.writeValueAsString(result));
+        Map<String, List<User>> resultMap = new HashMap<>();
+        resultMap.put("users", resultList);
+
+        writer.write(userParser.toJSON(resultMap));
         writer.close();
     }
 
@@ -73,7 +72,7 @@ public class UserServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json");
         String requestBody = RequestBodyParser.readBody(req);
-        User newUser = userParser.parse(requestBody);
+        User newUser = userParser.toModel(requestBody);
 
         if(!userValidator.validate(newUser)){
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -91,7 +90,7 @@ public class UserServlet extends HttpServlet {
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json");
         String requestBody = RequestBodyParser.readBody(req);
-        User updateUser = userParser.parse(requestBody);
+        User updateUser = userParser.toModel(requestBody);
 
         if(!userValidator.validate(updateUser)){
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);

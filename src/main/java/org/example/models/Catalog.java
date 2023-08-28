@@ -1,21 +1,24 @@
 package org.example.models;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.math.BigDecimal;
-import java.sql.Date;
+import java.time.LocalDate;
 
 public class Catalog {
     private Long id;
     private String brand;
     private String model;
-    private Date release_date;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate release_date;
     private BigDecimal price;
 
     public Catalog(){
         this.id = 0L;
     }
 
-    public Catalog(Long id, String brand, String model, Date release_date, BigDecimal price) {
+    public Catalog(Long id, String brand, String model, LocalDate release_date, BigDecimal price) {
         this.id = id;
         this.brand = brand;
         this.model = model;
@@ -47,11 +50,11 @@ public class Catalog {
         this.model = model;
     }
 
-    public Date getRelease_date() {
+    public LocalDate getRelease_date() {
         return release_date;
     }
 
-    public void setRelease_date(Date release_date) {
+    public void setRelease_date(LocalDate release_date) {
         this.release_date = release_date;
     }
 

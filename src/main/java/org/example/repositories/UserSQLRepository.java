@@ -5,6 +5,7 @@ import org.example.interfaces.CrudRepository;
 import org.example.interfaces.QuerySpecification;
 import org.example.models.User;
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +31,7 @@ public class UserSQLRepository implements CrudRepository<User> {
             preparedStatement.setString(1, object.getName());
             preparedStatement.setString(2, object.getSurname());
             preparedStatement.setString(3, object.getFather_name());
-            preparedStatement.setDate(4, object.getDob());
+            preparedStatement.setDate(4, Date.valueOf(object.getDob()));
             preparedStatement.setString(5, object.getSex());
 
             preparedStatement.executeUpdate();
@@ -58,7 +59,7 @@ public class UserSQLRepository implements CrudRepository<User> {
             statement.setString(1, object.getName());
             statement.setString(2, object.getSurname());
             statement.setString(3, object.getFather_name());
-            statement.setDate(4, object.getDob());
+            statement.setDate(4, Date.valueOf(object.getDob()));
             statement.setString(5, object.getSex());
             statement.setLong(6, object.getId());
 
@@ -96,7 +97,7 @@ public class UserSQLRepository implements CrudRepository<User> {
                 String name = resultSet.getString("name");
                 String surname = resultSet.getString("surname");
                 String father_name = resultSet.getString("father_name");
-                Date dob = resultSet.getDate("dob");
+                LocalDate dob = resultSet.getDate("dob").toLocalDate();
                 String sex = resultSet.getString("sex");
 
                 resultList.add(new User(id, name, surname, father_name, dob, sex));

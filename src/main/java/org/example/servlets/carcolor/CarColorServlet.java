@@ -1,13 +1,10 @@
 package org.example.servlets.carcolor;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.example.database.DatabaseConnector;
-import org.example.interfaces.CrudRepository;
 import org.example.interfaces.ModelParser;
 import org.example.interfaces.ModelValidator;
 import org.example.interfaces.QuerySpecification;
@@ -15,19 +12,16 @@ import org.example.models.CarColor;
 import org.example.parsers.JsonModelParser;
 import org.example.parsers.PathParser;
 import org.example.parsers.RequestBodyParser;
-import org.example.repositories.CarColorSQLRepository;
-import org.example.repositories.CatalogSQLRepository;
-import org.example.repositories.ColorSQLRepository;
 import org.example.responses.ErrorJsonResponse;
 import org.example.services.CarColorService;
 import org.example.specifications.carcolor.CarColorByCarIdSpecification;
 import org.example.specifications.carcolor.CarColorByIdsSpecification;
 import org.example.validators.CarColorValidator;
-
-import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CarColorServlet extends HttpServlet {
 
@@ -46,7 +40,6 @@ public class CarColorServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json");
-        ObjectMapper mapper = new ObjectMapper();
         PathParser parser = new PathParser(req.getPathInfo());
         PrintWriter writer = resp.getWriter();
         Long id = parser.parseLong(1);
@@ -67,7 +60,10 @@ public class CarColorServlet extends HttpServlet {
             return;
         }
 
-        writer.write(mapper.writeValueAsString(result));
+        Map<String, List<CarColor>> resultMap = new HashMap<>();
+        resultMap.put("colors", result);
+
+        writer.write(carColorParser.toJSON(resultMap));
         writer.close();
     }
 
@@ -75,7 +71,7 @@ public class CarColorServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json");
         String requestBody = RequestBodyParser.readBody(req);
-        CarColor newCarColor = carColorParser.parse(requestBody);
+        CarColor newCarColor = carColorParser.toModel(requestBody);
         PrintWriter writer = resp.getWriter();
 
         if(!carColorValidator.validate(newCarColor)){

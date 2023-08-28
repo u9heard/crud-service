@@ -1,13 +1,10 @@
 package org.example.servlets.color;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.example.database.DatabaseConnector;
-import org.example.interfaces.CrudRepository;
 import org.example.interfaces.ModelParser;
 import org.example.interfaces.ModelValidator;
 import org.example.interfaces.QuerySpecification;
@@ -15,7 +12,6 @@ import org.example.models.Color;
 import org.example.parsers.JsonModelParser;
 import org.example.parsers.PathParser;
 import org.example.parsers.RequestBodyParser;
-import org.example.repositories.ColorSQLRepository;
 import org.example.responses.ErrorJsonResponse;
 import org.example.services.ColorService;
 import org.example.specifications.color.ColorByIdSpecification;
@@ -23,7 +19,9 @@ import org.example.validators.ColorValidator;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ColorServlet extends HttpServlet {
 
@@ -42,7 +40,6 @@ public class ColorServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json");
-        ObjectMapper mapper = new ObjectMapper();
         PathParser parser = new PathParser(req.getPathInfo());
         PrintWriter writer = resp.getWriter();
 
@@ -64,8 +61,10 @@ public class ColorServlet extends HttpServlet {
             return;
         }
 
+        Map<String, List<Color>> resultMap = new HashMap<>();
+        resultMap.put("colors", result);
 
-        writer.write(mapper.writeValueAsString(result));
+        writer.write(colorParser.toJSON(resultMap));
         writer.close();
     }
 
@@ -73,7 +72,7 @@ public class ColorServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json");
         String requestBody = RequestBodyParser.readBody(req);
-        Color newColor = colorParser.parse(requestBody);
+        Color newColor = colorParser.toModel(requestBody);
         PrintWriter writer = resp.getWriter();
 
         if(!colorValidator.validate(newColor)){
@@ -98,7 +97,7 @@ public class ColorServlet extends HttpServlet {
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json");
         String requestBody = RequestBodyParser.readBody(req);
-        Color updateColor = colorParser.parse(requestBody);
+        Color updateColor = colorParser.toModel(requestBody);
         PrintWriter writer = resp.getWriter();
 
         if(!colorValidator.validate(updateColor)){

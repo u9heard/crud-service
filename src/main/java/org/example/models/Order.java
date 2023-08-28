@@ -1,6 +1,7 @@
 package org.example.models;
 
-import java.sql.Date;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import java.time.LocalDate;
 
 public class Order {
     private Long id;
@@ -8,13 +9,14 @@ public class Order {
     private Long idCar;
     private Long idVolume;
     private Long idColor;
-    private Date dateBuy;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate dateBuy;
 
     public Order() {
         this.id = 0L;
     }
 
-    public Order(Long id, Long idUser, Long idCar, Long idVolume, Long idColor, Date dateBuy) {
+    public Order(Long id, Long idUser, Long idCar, Long idVolume, Long idColor, LocalDate dateBuy) {
         this.id = id;
         this.idUser = idUser;
         this.idCar = idCar;
@@ -63,11 +65,11 @@ public class Order {
         this.idColor = idColor;
     }
 
-    public Date getDateBuy() {
+    public LocalDate getDateBuy() {
         return dateBuy;
     }
 
-    public void setDateBuy(Date dateBuy) {
+    public void setDateBuy(LocalDate dateBuy) {
         this.dateBuy = dateBuy;
     }
 }
