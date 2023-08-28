@@ -11,7 +11,7 @@
 <p>CATALOG</p>
 <ul>
 <li>curl -i -X GET "http://localhost:8080/crudservice/catalog/3" </li>
-<li>curl -i -X GET "http://localhost:8080/crudservice/catalog/brand/Ford" get by brand  </li>
+<li>curl -i -X GET "http://localhost:8080/crudservice/catalog/brand/Ford"// get by brand  </li>
 <li>curl -i -X POST -H "Content-Type: application/json" -d "{\"brand\": \"Ford\", \"model\":\"Focus\", \"release_date\":\"2013-01-01\", \"price\":\"1000\"}" http://localhost:8080/crudservice/catalog </li>
 <li>curl -i -X PUT -H "Content-Type: application/json" -d "{\"id\":\"8\", \"brand\": \"Ford\", \"model\":\"Focus\", \"release_date\":\"2013-01-01\", \"price\":\"1500\"}" http://localhost:8080/crudservice/catalog</li>
 <li>curl -i -X DELETE "http://localhost:8080/crudservice/catalog/2" </li>
@@ -50,7 +50,60 @@
 <p>ORDER</p>
 <ul>
 <li>curl -i -X GET "http://localhost:8080/crudservice/order/3" </li>
+
 <li>curl -i -X GET "http://localhost:8080/crudservice/order/user/5" // orders for user by user_id</li>
 <li>curl -i -X POST -H "Content-Type: application/json" -d "{\"idUser\": \"5\", \"idCar\":\"5\",\"idVolume\":\"1\", \"idColor\":\"5\", \"dateBuy\":\"2020-01-01\"}" http://localhost:8080/crudservice/order</li>
 <li>curl -i -X DELETE "http://localhost:8080/crudservice/order/2" </li>
 </ul>
+
+<p>Response example</p>
+
+Response for '/user/"id"': 
+
+```
+{
+  "users": [
+    {
+      "id": 5,
+      "name": "Ivan",
+      "surname": "Sergeev",
+      "father_name": "Sergeevich",
+      "dob": "1990-03-03",
+      "sex": "Male"
+    }
+  ]
+}
+```
+
+Response for '/catalog/brand/Ford': 
+
+```
+{
+  "catalog": [
+    {
+      "id": 8,
+      "brand": "Ford",
+      "model": "Focus",
+      "release_date": "2013-01-01",
+      "price": 1500
+    },
+    {
+      "id": 7,
+      "brand": "Ford",
+      "model": "Kuga",
+      "release_date": "2013-01-01",
+      "price": 1500
+    }
+  ]
+}
+```
+
+Possible errors:
+
+```
+{"message":"Not found"}
+{"message":"Model not full"}
+{"message":"Check input data"}
+{"message":"One or more entities are missing"}
+{"message":"The model already exists"}
+```
