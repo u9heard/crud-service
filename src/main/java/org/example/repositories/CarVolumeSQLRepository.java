@@ -41,7 +41,7 @@ public class CarVolumeSQLRepository implements CrudRepository<CarVolume> {
 
     @Override
     public void update(CarVolume object) {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override

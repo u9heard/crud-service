@@ -40,7 +40,7 @@ public class CarColorSQLRepository implements CrudRepository<CarColor> {
 
     @Override
     public void update(CarColor object) {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
