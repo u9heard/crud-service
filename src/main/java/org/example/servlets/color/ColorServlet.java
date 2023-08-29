@@ -89,8 +89,8 @@ public class ColorServlet extends HttpServlet {
             return;
         }
 
-        writer.close();
         resp.setStatus(HttpServletResponse.SC_CREATED);
+        writer.close();
     }
 
     @Override
