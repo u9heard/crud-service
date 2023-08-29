@@ -1,5 +1,7 @@
 # crud-service
 
+<h3><p>Requests:</p></h3>
+
 <p>USERS</p>
 <ul>
 <li>curl -i -X GET "http://localhost:8080/crudservice/user/1"</li>
@@ -56,7 +58,7 @@
 <li>curl -i -X DELETE "http://localhost:8080/crudservice/order/2" </li>
 </ul>
 
-<p>Response example</p>
+<h3><p>Response examples:</p></h3>
 
 Response for '/user/"id"': 
 
@@ -107,3 +109,7 @@ Possible errors:
 {"message":"One or more entities are missing"}
 {"message":"The model already exists"}
 ```
+
+<h3><p>Database:</p></h3>
+
+<img src="https://github.com/u9heard/crud-service/blob/master/Database.png" alt="database" style="max-width: 100%;">
