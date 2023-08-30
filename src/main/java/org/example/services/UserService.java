@@ -1,5 +1,6 @@
 package org.example.services;
 
+import org.example.interfaces.CrudRepository;
 import org.example.interfaces.QuerySpecification;
 import org.example.models.User;
 import org.example.repositories.UserSQLRepository;
@@ -7,9 +8,9 @@ import org.example.repositories.UserSQLRepository;
 import java.util.List;
 
 public class UserService {
-    private UserSQLRepository userRepository;
+    private CrudRepository<User> userRepository;
 
-    public UserService(UserSQLRepository userRepository) {
+    public UserService(CrudRepository<User> userRepository) {
         this.userRepository = userRepository;
     }
 

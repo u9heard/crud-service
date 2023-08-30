@@ -12,7 +12,7 @@ import org.example.specifications.color.ColorByNameSpecification;
 public class ColorService {
     private CrudRepository<Color> colorRepository;
 
-    public ColorService(ColorSQLRepository colorRepository) {
+    public ColorService(CrudRepository<Color> colorRepository) {
         this.colorRepository = colorRepository;
     }
 

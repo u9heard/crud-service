@@ -13,7 +13,7 @@ import java.util.List;
 public class VolumeService {
     private CrudRepository<Volume> volumeRepository;
 
-    public VolumeService(VolumeSQLRepository volumeRepository) {
+    public VolumeService(CrudRepository<Volume> volumeRepository) {
         this.volumeRepository = volumeRepository;
     }
 
