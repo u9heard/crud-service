@@ -23,9 +23,8 @@ JsonModelParser<T> implements ModelParser<T> {
                 return objectMapper.readValue(json, tClass);
             }
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
-
         return null;
     }
 
@@ -33,8 +32,7 @@ JsonModelParser<T> implements ModelParser<T> {
         try {
             return objectMapper.writeValueAsString(object);
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
-        return null;
     }
 }

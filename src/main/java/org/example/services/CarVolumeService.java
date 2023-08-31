@@ -1,7 +1,9 @@
 package org.example.services;
 
+import org.example.exceptions.database.service.ModelConflictException;
 import org.example.interfaces.CrudRepository;
 import org.example.interfaces.QuerySpecification;
+import org.example.interfaces.StorageService;
 import org.example.models.CarColor;
 import org.example.models.CarVolume;
 import org.example.models.Catalog;
@@ -11,39 +13,28 @@ import org.example.specifications.volume.VolumeByIdSpecification;
 
 import java.util.List;
 
-public class CarVolumeService {
-    private CrudRepository<Catalog> catalogRepository;
-    private CrudRepository<Volume> volumeRepository;
-    private CrudRepository<CarVolume> carVolumeRepository;
+public class CarVolumeService extends StorageService<CarVolume> {
+    private final CrudRepository<Catalog> catalogRepository;
+    private final CrudRepository<Volume> volumeRepository;
 
     public CarVolumeService(CrudRepository<Catalog> catalogRepository, CrudRepository<Volume> volumeRepository, CrudRepository<CarVolume> carVolumeRepository) {
+        super(carVolumeRepository);
         this.catalogRepository = catalogRepository;
         this.volumeRepository = volumeRepository;
-        this.carVolumeRepository = carVolumeRepository;
     }
 
-    public boolean add(CarVolume carVolume){
+    public void add(CarVolume carVolume){
         if(checkVolume(carVolume.getIdVolume()) && checkCatalog(carVolume.getIdCar())){
-            this.carVolumeRepository.save(carVolume);
-            return true;
+            this.modelRepository.save(carVolume);
         }
-        return false;
+        throw new ModelConflictException("Unique check failed");
     }
 
-    public void delete(QuerySpecification specification){
-        this.carVolumeRepository.delete(specification);
-    }
-
-    public boolean update(CarVolume carVolume){
+    public void update(CarVolume carVolume){
         if(checkVolume(carVolume.getIdVolume()) && checkCatalog(carVolume.getIdCar())){
-            this.carVolumeRepository.update(carVolume);
-            return true;
+            this.modelRepository.update(carVolume);
         }
-        return false;
-    }
-
-    public List<CarVolume> get(QuerySpecification specification){
-        return this.carVolumeRepository.query(specification);
+        throw new ModelConflictException("Unique check failed");
     }
 
     private boolean checkCatalog(Long id){

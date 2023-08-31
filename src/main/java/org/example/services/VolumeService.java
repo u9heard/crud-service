@@ -1,7 +1,9 @@
 package org.example.services;
 
+import org.example.exceptions.database.service.ModelConflictException;
 import org.example.interfaces.CrudRepository;
 import org.example.interfaces.QuerySpecification;
+import org.example.interfaces.StorageService;
 import org.example.models.Color;
 import org.example.models.Volume;
 import org.example.repositories.VolumeSQLRepository;
@@ -10,38 +12,27 @@ import org.example.specifications.volume.VolumeByNameSpecification;
 
 import java.util.List;
 
-public class VolumeService {
-    private CrudRepository<Volume> volumeRepository;
+public class VolumeService extends StorageService<Volume> {
 
     public VolumeService(CrudRepository<Volume> volumeRepository) {
-        this.volumeRepository = volumeRepository;
+        super(volumeRepository);
     }
 
-    public boolean add(Volume volume){
+    public void add(Volume volume){
         if(checkVolume(volume)) {
-            this.volumeRepository.save(volume);
-            return true;
+            this.modelRepository.save(volume);
         }
-        return false;
+        throw new ModelConflictException("Unique check failed");
     }
 
-    public void delete(QuerySpecification specification){
-        this.volumeRepository.delete(specification);
-    }
-
-    public boolean update(Volume volume){
+    public void update(Volume volume){
         if(checkVolume(volume)) {
-            this.volumeRepository.update(volume);
-            return true;
+            this.modelRepository.update(volume);
         }
-        return false;
-    }
-
-    public List<Volume> get(QuerySpecification specification){
-        return this.volumeRepository.query(specification);
+        throw new ModelConflictException("Unique check failed");
     }
 
     private boolean checkVolume(Volume volume){
-        return this.volumeRepository.query(new VolumeByNameSpecification(volume.getVolume())).isEmpty();
+        return this.modelRepository.query(new VolumeByNameSpecification(volume.getVolume())).isEmpty();
     }
 }

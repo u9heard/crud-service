@@ -1,7 +1,9 @@
 package org.example.services;
 
+import org.example.exceptions.database.service.ModelConflictException;
 import org.example.interfaces.CrudRepository;
 import org.example.interfaces.QuerySpecification;
+import org.example.interfaces.StorageService;
 import org.example.models.CarColor;
 import org.example.models.Catalog;
 import org.example.models.Color;
@@ -10,40 +12,30 @@ import org.example.specifications.color.ColorByIdSpecification;
 
 import java.util.List;
 
-public class CarColorService {
+public class CarColorService extends StorageService<CarColor> {
     private CrudRepository<Catalog> catalogRepository;
     private CrudRepository<Color> colorRepository;
-    private CrudRepository<CarColor> carColorRepository;
 
     public CarColorService(CrudRepository<Catalog> catalogRepository, CrudRepository<Color> colorRepository, CrudRepository<CarColor> carColorRepository) {
+        super(carColorRepository);
         this.catalogRepository = catalogRepository;
         this.colorRepository = colorRepository;
-        this.carColorRepository = carColorRepository;
     }
 
-    public boolean add(CarColor carColor){
+    public void add(CarColor carColor){
         if(checkCatalog(carColor.getIdCar()) && checkColor(carColor.getIdColor())){
-            this.carColorRepository.save(carColor);
-            return true;
+            this.modelRepository.save(carColor);
         }
-        return false;
+        throw new ModelConflictException("Unique check failed");
     }
 
-    public void delete(QuerySpecification spec){
-        this.carColorRepository.delete(spec);
-    }
-
-    public boolean update(CarColor carColor){
+    public void update(CarColor carColor){
         if(checkCatalog(carColor.getIdCar()) && checkColor(carColor.getIdColor())){
-            this.carColorRepository.update(carColor);
-            return true;
+            this.modelRepository.update(carColor);
         }
-        return false;
+        throw new ModelConflictException("Unique check failed");
     }
 
-    public List<CarColor> get(QuerySpecification spec){
-        return this.carColorRepository.query(spec);
-    }
 
     private boolean checkCatalog(Long id){
         return !this.catalogRepository.query(new CatalogByIdSpecification(id)).isEmpty();

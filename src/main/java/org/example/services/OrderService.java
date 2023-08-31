@@ -1,54 +1,47 @@
 package org.example.services;
 
+import org.example.exceptions.database.service.ModelConflictException;
+import org.example.exceptions.database.service.ModelNotFoundException;
 import org.example.interfaces.CrudRepository;
 import org.example.interfaces.QuerySpecification;
+import org.example.interfaces.StorageService;
 import org.example.models.*;
 import org.example.specifications.carcolor.CarColorByIdsSpecification;
 import org.example.specifications.carvolume.CarVolumeByIdsSpecification;
 import org.example.specifications.catalog.CatalogByIdSpecification;
+import org.example.specifications.order.OrderByIdSpecification;
 import org.example.specifications.user.UserByIdSpecification;
 
 import java.util.List;
 
-public class OrderService {
+public class OrderService extends StorageService<Order> {
     CrudRepository<User> userRepository;
     CrudRepository<Catalog> catalogRepository;
     CrudRepository<CarColor> carColorRepository;
     CrudRepository<CarVolume> carVolumeRepository;
-    CrudRepository<Order> orderRepository;
 
     public OrderService(CrudRepository<User> userRepository, CrudRepository<Catalog> catalogRepository, CrudRepository<CarColor> carColorRepository, CrudRepository<CarVolume> carVolumeRepository, CrudRepository<Order> orderRepository) {
+        super(orderRepository);
         this.userRepository = userRepository;
         this.catalogRepository = catalogRepository;
         this.carColorRepository = carColorRepository;
         this.carVolumeRepository = carVolumeRepository;
-        this.orderRepository = orderRepository;
     }
 
-    public boolean add(Order order){
+    public void add(Order order){
         if(checkUser(order.getIdUser()) && checkCatalog(order.getIdCar()) &&
            checkCarColor(order.getIdCar(), order.getIdColor()) && checkCarVolume(order.getIdCar(), order.getIdVolume())){
-            this.orderRepository.save(order);
-            return true;
+            this.modelRepository.save(order);
         }
-        return false;
+        throw new ModelConflictException("Unique check failed");
     }
 
-    public void delete(QuerySpecification spec){
-        this.orderRepository.delete(spec);
-    }
-
-    public boolean update(Order order){
+    public void update(Order order){
         if(checkUser(order.getIdUser()) && checkCatalog(order.getIdCar()) &&
                 checkCarColor(order.getIdCar(), order.getIdColor()) && checkCarVolume(order.getIdCar(), order.getIdVolume())){
-            this.orderRepository.save(order);
-            return true;
+            this.modelRepository.save(order);
         }
-        return false;
-    }
-
-    public List<Order> get(QuerySpecification spec){
-        return this.orderRepository.query(spec);
+        throw new ModelConflictException("Unique check failed");
     }
 
     private boolean checkUser(Long id){

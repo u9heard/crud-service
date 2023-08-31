@@ -1,53 +1,46 @@
 package org.example.services;
 
+import org.example.exceptions.database.service.ModelConflictException;
+import org.example.exceptions.database.service.ModelNotFoundException;
 import org.example.interfaces.CrudRepository;
 import org.example.interfaces.QuerySpecification;
+import org.example.interfaces.StorageService;
 import org.example.models.Catalog;
 import org.example.specifications.catalog.CatalogByBrandModelSpecification;
 import org.example.specifications.catalog.CatalogByIdBrandModelSpecification;
+import org.example.specifications.catalog.CatalogByIdSpecification;
+import org.example.specifications.color.ColorByIdSpecification;
 
 import java.util.List;
 
-public class CatalogService {
-    private CrudRepository<Catalog> catalogRepository;
+public class CatalogService extends StorageService<Catalog> {
 
     public CatalogService(CrudRepository<Catalog> catalogRepository) {
-        this.catalogRepository = catalogRepository;
+        super(catalogRepository);
     }
 
-    public boolean add(Catalog catalog){
+    public void add(Catalog catalog){
         if(checkUniqueOnInsert(catalog.getBrand(), catalog.getModel())){
-            this.catalogRepository.save(catalog);
-            return true;
+            this.modelRepository.save(catalog);
         }
-        return false;
+        throw new ModelConflictException("Unique check failed");
     }
 
-    public void delete(QuerySpecification specification){
-        this.catalogRepository.delete(specification);
-    }
-
-    public boolean update(Catalog catalog){
+    public void update(Catalog catalog){
         if(checkUniqueOnUpdate(catalog.getId(), catalog.getBrand(), catalog.getModel())){
-            this.catalogRepository.update(catalog);
-            return true;
+            this.modelRepository.update(catalog);
         }
-        return false;
-    }
-
-    public List<Catalog> get(QuerySpecification specification){
-        return this.catalogRepository.query(specification);
+        throw new ModelConflictException("Unique check failed");
     }
 
     private boolean checkUniqueOnInsert(String brand, String model){
-        return this.catalogRepository.query(new CatalogByBrandModelSpecification(brand, model)).isEmpty();
+        return this.modelRepository.query(new CatalogByBrandModelSpecification(brand, model)).isEmpty();
     }
 
     private boolean checkUniqueOnUpdate(Long id, String brand, String model){
-        if(this.catalogRepository.query(new CatalogByIdBrandModelSpecification(id, brand, model)).isEmpty()){
+        if(this.modelRepository.query(new CatalogByIdBrandModelSpecification(id, brand, model)).isEmpty()){
             return checkUniqueOnInsert(brand, model);
         }
-
         return true;
     }
 }
