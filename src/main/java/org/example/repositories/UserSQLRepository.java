@@ -1,6 +1,10 @@
 package org.example.repositories;
 
 import org.example.database.DatabaseConnector;
+import org.example.exceptions.database.access.DatabaseDeleteException;
+import org.example.exceptions.database.access.DatabaseReadException;
+import org.example.exceptions.database.access.DatabaseSaveException;
+import org.example.exceptions.database.access.DatabaseUpdateException;
 import org.example.interfaces.CrudRepository;
 import org.example.interfaces.QuerySpecification;
 import org.example.models.User;
@@ -38,7 +42,8 @@ public class UserSQLRepository implements CrudRepository<User> {
 
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            throw new DatabaseSaveException(e.getMessage());
         }
     }
 
@@ -66,7 +71,8 @@ public class UserSQLRepository implements CrudRepository<User> {
             statement.executeUpdate();
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            throw new DatabaseUpdateException(e.getMessage());
         }
     }
 
@@ -79,7 +85,8 @@ public class UserSQLRepository implements CrudRepository<User> {
 
             statement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            throw new DatabaseDeleteException(e.getMessage());
         }
     }
 
@@ -106,7 +113,8 @@ public class UserSQLRepository implements CrudRepository<User> {
             return resultList;
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            throw new DatabaseReadException(e.getMessage());
         }
     }
 }

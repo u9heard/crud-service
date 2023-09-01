@@ -1,6 +1,10 @@
 package org.example.repositories;
 
 import org.example.database.DatabaseConnector;
+import org.example.exceptions.database.access.DatabaseDeleteException;
+import org.example.exceptions.database.access.DatabaseReadException;
+import org.example.exceptions.database.access.DatabaseSaveException;
+import org.example.exceptions.database.access.DatabaseUpdateException;
 import org.example.interfaces.CrudRepository;
 import org.example.interfaces.QuerySpecification;
 import org.example.models.Order;
@@ -35,7 +39,8 @@ public class OrderSQLRepository implements CrudRepository<Order> {
 
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            throw new DatabaseSaveException(e.getMessage());
         }
     }
 
@@ -62,7 +67,8 @@ public class OrderSQLRepository implements CrudRepository<Order> {
 
             statement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            throw new DatabaseUpdateException(e.getMessage());
         }
     }
 
@@ -75,7 +81,8 @@ public class OrderSQLRepository implements CrudRepository<Order> {
 
             statement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            throw new DatabaseDeleteException(e.getMessage());
         }
     }
 
@@ -101,7 +108,8 @@ public class OrderSQLRepository implements CrudRepository<Order> {
             return resultList;
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            throw new DatabaseReadException(e.getMessage());
         }
     }
 }

@@ -1,6 +1,9 @@
 package org.example.repositories;
 
 import org.example.database.DatabaseConnector;
+import org.example.exceptions.database.access.DatabaseDeleteException;
+import org.example.exceptions.database.access.DatabaseReadException;
+import org.example.exceptions.database.access.DatabaseSaveException;
 import org.example.interfaces.CrudRepository;
 import org.example.interfaces.QuerySpecification;
 import org.example.models.CarVolume;
@@ -35,7 +38,8 @@ public class CarVolumeSQLRepository implements CrudRepository<CarVolume> {
             preparedStatement.setLong(2, object.getIdVolume());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            throw new DatabaseSaveException(e.getMessage());
         }
     }
 
@@ -53,7 +57,8 @@ public class CarVolumeSQLRepository implements CrudRepository<CarVolume> {
 
             statement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            throw new DatabaseDeleteException(e.getMessage());
         }
     }
 
@@ -76,7 +81,8 @@ public class CarVolumeSQLRepository implements CrudRepository<CarVolume> {
             return resultList;
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            throw new DatabaseReadException(e.getMessage());
         }
     }
 }

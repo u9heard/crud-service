@@ -1,6 +1,10 @@
 package org.example.repositories;
 
 import org.example.database.DatabaseConnector;
+import org.example.exceptions.database.access.DatabaseDeleteException;
+import org.example.exceptions.database.access.DatabaseReadException;
+import org.example.exceptions.database.access.DatabaseSaveException;
+import org.example.exceptions.database.access.DatabaseUpdateException;
 import org.example.interfaces.CrudRepository;
 import org.example.interfaces.QuerySpecification;
 import org.example.models.Color;
@@ -30,7 +34,8 @@ public class ColorSQLRepository implements CrudRepository<Color> {
             preparedStatement.setString(1, object.getColor());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            throw new DatabaseSaveException(e.getMessage());
         }
     }
 
@@ -50,7 +55,8 @@ public class ColorSQLRepository implements CrudRepository<Color> {
             statement.executeUpdate();
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            throw new DatabaseUpdateException(e.getMessage());
         }
     }
 
@@ -63,7 +69,8 @@ public class ColorSQLRepository implements CrudRepository<Color> {
 
             statement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            throw new DatabaseDeleteException(e.getMessage());
         }
     }
 
@@ -86,7 +93,8 @@ public class ColorSQLRepository implements CrudRepository<Color> {
             return resultList;
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            throw new DatabaseReadException(e.getMessage());
         }
     }
 }
