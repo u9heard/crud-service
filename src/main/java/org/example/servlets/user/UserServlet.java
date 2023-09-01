@@ -16,6 +16,7 @@ import org.example.parsers.RequestBodyParser;
 import org.example.responses.ErrorJsonResponse;
 import org.example.services.UserService;
 import org.example.servlets.BaseServlet;
+import org.example.specifications.DefaultByIdSpecification;
 import org.example.specifications.user.UserByIdSpecification;
 import org.example.validators.UserValidator;
 import java.io.IOException;
@@ -36,17 +37,9 @@ public class UserServlet extends BaseServlet<User, Long> {
         this.modelName = "user";
     }
 
-
     @Override
-    protected String getJson(User model) {
-        Map<String, User> resultMap = new HashMap<>();
-        resultMap.put("user", model);
-        return modelParser.toJSON(resultMap);
-    }
-
-    @Override
-    protected User getModelFromDatabase(Long id) {
-        return this.modelService.getById(id);
+    protected List<User> getModelFromDatabase(Long id) {
+        return this.modelService.query(new DefaultByIdSpecification(id));
     }
 
     @Override

@@ -1,36 +1,31 @@
-package org.example.servlets.catalog;
+package org.example.servlets.order;
 
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
-import org.example.interfaces.StorageService;
-import org.example.models.Catalog;
-import org.example.models.User;
+import org.example.models.Order;
 import org.example.parsers.JsonModelParser;
 import org.example.parsers.LongPathParser;
-import org.example.services.CatalogService;
+import org.example.services.OrderService;
 import org.example.servlets.BaseServlet;
 import org.example.specifications.DefaultByIdSpecification;
-import org.example.validators.CatalogValidator;
+import org.example.validators.OrderValidator;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-public class CatalogServlet extends BaseServlet<Catalog, Long> {
+public class OrderServlet extends BaseServlet<Order, Long> {
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        this.modelService = (CatalogService) getServletContext().getAttribute("catalogService");
-        this.modelParser = new JsonModelParser<>(Catalog.class);
-        this.modelValidator = new CatalogValidator();
+        this.modelService = (OrderService) getServletContext().getAttribute("orderService");
+        this.modelParser = new JsonModelParser<>(Order.class);
+        this.modelValidator = new OrderValidator();
         this.pathParser = new LongPathParser();
-        this.modelName = "catalog";
+        this.modelName = "order";
     }
 
-
     @Override
-    protected List<Catalog> getModelFromDatabase(Long id) {
+    protected List<Order> getModelFromDatabase(Long id) {
         return this.modelService.query(new DefaultByIdSpecification(id));
     }
 

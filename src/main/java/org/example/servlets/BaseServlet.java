@@ -13,20 +13,21 @@ import org.example.parsers.RequestBodyParser;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-public abstract class BaseServlet<T, PathParam> extends HttpServlet {
+public abstract class BaseServlet<T, Id> extends HttpServlet {
     protected StorageService<T> modelService;
     protected ModelParser<T> modelParser;
     protected ModelValidator<T> modelValidator;
-    protected PathParser<PathParam> pathParser;
+    protected PathParser<Id> pathParser;
     protected String modelName;
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json");
-        PathParam id = parseIdFromPath(req.getPathInfo());
-        T model = getModelFromDatabase(id);
+        Id id = parseIdFromPath(req.getPathInfo());
+        List<T> model = getModelFromDatabase(id);
         String jsonResponse = getJson(model);
         PrintWriter writer = resp.getWriter();
         writer.write(jsonResponse);
@@ -56,21 +57,21 @@ public abstract class BaseServlet<T, PathParam> extends HttpServlet {
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json");
-        PathParam id = parseIdFromPath(req.getPathInfo());
+        Id id = parseIdFromPath(req.getPathInfo());
         deleteModelFromDatabase(id);
     }
 
-    protected String getJson(T model)
+    protected String getJson(List<T> models)
     {
         Map<String, T> resultMap = new HashMap<>();
-        resultMap.put(modelName, model);
+        resultMap.put(modelName, models.get(0));
         return modelParser.toJSON(resultMap);
     }
 
-    protected abstract T getModelFromDatabase(PathParam id);
-    protected abstract void deleteModelFromDatabase(PathParam id);
+    protected abstract List<T> getModelFromDatabase(Id id);
+    protected abstract void deleteModelFromDatabase(Id id);
 
-    private PathParam parseIdFromPath(String pathInfo)  {
+    private Id parseIdFromPath(String pathInfo)  {
         return pathParser.parsePath(pathInfo,1);
     }
 }
