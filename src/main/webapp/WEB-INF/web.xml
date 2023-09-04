@@ -36,7 +36,7 @@
 
   <servlet>
     <servlet-name>UserServlet</servlet-name>
-    <servlet-class>org.example.servlets.user.UserServlet</servlet-class>
+    <servlet-class>org.example.servlets.users.UserServlet</servlet-class>
   </servlet>
   <servlet>
     <servlet-name>CatalogServlet</servlet-name>

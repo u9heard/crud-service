@@ -3,8 +3,8 @@ package org.example.filters;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.exceptions.MethodNotAllowedException;
-import org.example.exceptions.ParametersParseException;
-import org.example.exceptions.PathParsingException;
+import org.example.exceptions.parsers.ParametersParseException;
+import org.example.exceptions.parsers.PathParseException;
 import org.example.exceptions.database.access.DatabaseDeleteException;
 import org.example.exceptions.database.access.DatabaseReadException;
 import org.example.exceptions.database.access.DatabaseSaveException;
@@ -36,7 +36,7 @@ public class ExceptionsFilter implements Filter {
             filterChain.doFilter(servletRequest, servletResponse);
         } catch (UnsupportedOperationException | ServletException | IOException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        } catch (ParametersParseException | PathParsingException | DatabaseServiceException e){
+        } catch (ParametersParseException | PathParseException | DatabaseServiceException e){
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             writer.write(JsonMessageResponse.getJsonMessage(e.getMessage()));
         } catch (ModelConflictException e){
@@ -51,8 +51,7 @@ public class ExceptionsFilter implements Filter {
         } catch (DatabaseSaveException | DatabaseReadException | DatabaseDeleteException | DatabaseUpdateException e){
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             writer.write(JsonMessageResponse.getJsonMessage("Database error"));
-        }
-        finally {
+        } finally {
             writer.close();
         }
     }

@@ -1,16 +1,13 @@
 package org.example.services;
 
+import org.example.criteria.SearchCriteria;
+import org.example.criteria.SearchOperator;
 import org.example.exceptions.database.service.ModelConflictException;
 import org.example.exceptions.database.service.ModelNotFoundException;
 import org.example.interfaces.CrudRepository;
 import org.example.interfaces.QuerySpecification;
 import org.example.interfaces.StorageService;
 import org.example.models.*;
-import org.example.specifications.carcolor.CarColorByIdsSpecification;
-import org.example.specifications.carvolume.CarVolumeByIdsSpecification;
-import org.example.specifications.catalog.CatalogByIdSpecification;
-import org.example.specifications.order.OrderByIdSpecification;
-import org.example.specifications.user.UserByIdSpecification;
 
 import java.util.List;
 
@@ -45,22 +42,22 @@ public class OrderService extends StorageService<Order> {
     }
 
     private boolean checkUser(Long id){
-        QuerySpecification specification = new UserByIdSpecification(id);
-        return !this.userRepository.query(specification).isEmpty();
+        return !this.userRepository.query(List.of(new SearchCriteria("id", SearchOperator.EQUALS, id))).isEmpty();
     }
 
     private boolean checkCatalog(Long id){
-        QuerySpecification specification = new CatalogByIdSpecification(id);
-        return !this.catalogRepository.query(specification).isEmpty();
+        return !this.catalogRepository.query(List.of(new SearchCriteria("id", SearchOperator.EQUALS, id))).isEmpty();
     }
 
     private boolean checkCarColor(Long id_car, Long id_color){
-        QuerySpecification specification = new CarColorByIdsSpecification(id_car, id_color);
-        return !this.carColorRepository.query(specification).isEmpty();
+        return !this.carColorRepository.query(List.of(
+                new SearchCriteria("id_car", SearchOperator.EQUALS, id_car),
+                new SearchCriteria("id_color", SearchOperator.EQUALS, id_color))).isEmpty();
     }
 
     private boolean checkCarVolume(Long id_car, Long id_volume){
-        QuerySpecification specification = new CarVolumeByIdsSpecification(id_car, id_volume);
-        return !this.carVolumeRepository.query(specification).isEmpty();
+        return !this.carColorRepository.query(List.of(
+                new SearchCriteria("id_car", SearchOperator.EQUALS, id_car),
+                new SearchCriteria("id_volume", SearchOperator.EQUALS, id_volume))).isEmpty();
     }
 }

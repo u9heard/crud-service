@@ -1,8 +1,7 @@
 package org.example.interfaces;
 
+import org.example.criteria.SearchCriteria;
 import org.example.exceptions.database.service.ModelNotFoundException;
-import org.example.specifications.DefaultByIdSpecification;
-import org.example.specifications.order.OrderByIdSpecification;
 
 import java.util.List;
 
@@ -14,24 +13,22 @@ public abstract class StorageService<T> {
     }
 
     public abstract void add(T model);
-    public void deleteBySpecification(QuerySpecification specification){
-        this.modelRepository.delete(specification);
-    }
+
     public void deleteById(Long id){
-        this.modelRepository.delete(new DefaultByIdSpecification(id));
+        this.modelRepository.deleteById(id);
     }
     public abstract void update(T model);
     public T getById(Long id){
-        List<T> resultList = this.modelRepository.query(new DefaultByIdSpecification(id));
+        List<T> resultList = this.modelRepository.getById(id);
         if(resultList.isEmpty()){
             throw new ModelNotFoundException(String.format("Model not found, id = \"%d\"", id));
         }
         return resultList.get(0);
     }
-    public List<T> query(QuerySpecification specification){
-        List<T> resultList = this.modelRepository.query(specification);
+    public List<T> query(List<SearchCriteria> criteriaList){
+        List<T> resultList = this.modelRepository.query(criteriaList);
         if(resultList.isEmpty()){
-            throw new ModelNotFoundException(String.format("Model not found, specification = \"%s\"", specification.toSQLClauses()));
+            throw new ModelNotFoundException(String.format("Model not found, specification = \"%s\"", criteriaList.toString()));
         }
         return resultList;
     }

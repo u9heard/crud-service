@@ -2,6 +2,7 @@ package org.example.parsers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.example.exceptions.parsers.JsonParseException;
 import org.example.interfaces.ModelParser;
 
 public class
@@ -23,7 +24,8 @@ JsonModelParser<T> implements ModelParser<T> {
                 return objectMapper.readValue(json, tClass);
             }
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            throw new JsonParseException(json);
         }
         return null;
     }
@@ -32,7 +34,8 @@ JsonModelParser<T> implements ModelParser<T> {
         try {
             return objectMapper.writeValueAsString(object);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            throw new JsonParseException("Unable to convert Object -> JSON");
         }
     }
 }

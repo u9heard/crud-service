@@ -1,39 +1,38 @@
-package org.example.servlets.order;
+package org.example.servlets.users;
 
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.example.handlers.RequestHandler;
 import org.example.interfaces.ModelParser;
 import org.example.interfaces.ModelValidator;
 import org.example.interfaces.StorageService;
-import org.example.models.Order;
 import org.example.models.User;
-import org.example.services.OrderService;
 import org.example.services.UserService;
-import org.example.validators.OrderValidator;
+import org.example.handlers.RequestHandler;
 import org.example.validators.UserValidator;
 
 import java.io.IOException;
 
-public class OrderServlet extends HttpServlet {
-    private StorageService<Order> orderStorageService;
-    private ModelParser<Order> orderModelParser;
-    private ModelValidator<Order> orderModelValidator;
+public class UserServlet extends HttpServlet {
+
+    private StorageService<User> userStorageService;
+    private ModelParser<User> userModelParser;
+    private ModelValidator<User> userModelValidator;
     private String MODEL_NAME;
 
-    private RequestHandler<Order> requestHandler;
+    private RequestHandler<User> requestHandler;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        this.orderModelValidator = (OrderValidator) getServletContext().getAttribute("orderValidator");
-        this.orderModelParser = (ModelParser<Order>) getServletContext().getAttribute("orderParser");
-        this.orderStorageService = (OrderService) getServletContext().getAttribute("orderService");
+
+        this.userModelValidator = (UserValidator) getServletContext().getAttribute("userValidator");
+        this.userModelParser = (ModelParser<User>) getServletContext().getAttribute("userParser");
+        this.userStorageService = (UserService) getServletContext().getAttribute("userService");
         this.MODEL_NAME = "user";
-        this.requestHandler = new RequestHandler<>(orderStorageService, orderModelParser, orderModelValidator, MODEL_NAME);
+        this.requestHandler = new RequestHandler<>(userStorageService, userModelParser, userModelValidator, MODEL_NAME);
     }
 
     @Override

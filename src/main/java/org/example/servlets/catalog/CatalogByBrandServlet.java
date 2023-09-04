@@ -5,6 +5,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.example.exceptions.MethodNotAllowedException;
+import org.example.handlers.CatalogByBrandRequestHandler;
 import org.example.interfaces.ModelParser;
 import org.example.interfaces.ModelValidator;
 import org.example.interfaces.StorageService;
@@ -15,12 +17,12 @@ import org.example.validators.CatalogValidator;
 
 import java.io.IOException;
 
-public class CatalogServlet extends HttpServlet {
+public class CatalogByBrandServlet extends HttpServlet {
+
     private StorageService<Catalog> catalogStorageService;
     private ModelParser<Catalog> catalogModelParser;
     private ModelValidator<Catalog> catalogModelValidator;
     private String MODEL_NAME;
-
     private RequestHandler<Catalog> catalogRequestHandler;
 
     @Override
@@ -30,7 +32,7 @@ public class CatalogServlet extends HttpServlet {
         this.catalogModelParser = (ModelParser<Catalog>) getServletContext().getAttribute("catalogParser");
         this.catalogStorageService = (CatalogService) getServletContext().getAttribute("catalogService");
         this.MODEL_NAME = "catalog";
-        this.catalogRequestHandler = new RequestHandler<>(catalogStorageService, catalogModelParser, catalogModelValidator, MODEL_NAME);
+        this.catalogRequestHandler = new CatalogByBrandRequestHandler(catalogStorageService, catalogModelParser, catalogModelValidator, MODEL_NAME);
     }
 
     @Override
@@ -40,16 +42,16 @@ public class CatalogServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        this.catalogRequestHandler.handlePost(req, resp);
+        throw new MethodNotAllowedException(String.format("Method %s not allowed", req.getMethod()));
     }
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        this.catalogRequestHandler.handlePut(req, resp);
+        throw new MethodNotAllowedException(String.format("Method %s not allowed", req.getMethod()));
     }
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        this.catalogRequestHandler.handleDelete(req, resp);
+        throw new MethodNotAllowedException(String.format("Method %s not allowed", req.getMethod()));
     }
 }

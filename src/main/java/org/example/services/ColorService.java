@@ -1,5 +1,7 @@
 package org.example.services;
 
+import org.example.criteria.SearchCriteria;
+import org.example.criteria.SearchOperator;
 import org.example.exceptions.database.service.ModelConflictException;
 import org.example.exceptions.database.service.ModelNotFoundException;
 import org.example.interfaces.CrudRepository;
@@ -8,9 +10,6 @@ import org.example.interfaces.StorageService;
 import org.example.models.Color;
 
 import java.util.List;
-
-import org.example.specifications.color.ColorByIdSpecification;
-import org.example.specifications.color.ColorByNameSpecification;
 
 public class ColorService extends StorageService<Color> {
 
@@ -34,6 +33,6 @@ public class ColorService extends StorageService<Color> {
     }
 
     private boolean checkColor(Color color){
-        return this.modelRepository.query(new ColorByNameSpecification(color.getColor())).isEmpty();
+        return this.modelRepository.query(List.of(new SearchCriteria("color", SearchOperator.EQUALS, color.getColor()))).isEmpty();
     }
 }

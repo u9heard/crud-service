@@ -2,33 +2,46 @@ package org.example.servlets.carcolor;
 
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.exceptions.MethodNotAllowedException;
-import org.example.exceptions.ParametersParseException;
-import org.example.interfaces.QuerySpecification;
+import org.example.handlers.RequestHandler;
+import org.example.interfaces.ModelParser;
+import org.example.interfaces.ModelValidator;
+import org.example.interfaces.StorageService;
 import org.example.models.CarColor;
-import org.example.parsers.JsonModelParser;
-import org.example.parsers.LongPathParser;
 import org.example.services.CarColorService;
-import org.example.servlets.BaseServlet;
-import org.example.specifications.carcolor.CarColorByCarIdSpecification;
-import org.example.specifications.carcolor.CarColorByIdsSpecification;
 import org.example.validators.CarColorValidator;
 
 import java.io.IOException;
-import java.util.List;
 
-public class CarColorServlet extends BaseServlet<CarColor, Long> {
+public class CarColorServlet extends HttpServlet {
+    private StorageService<CarColor> carColorStorageService;
+    private ModelParser<CarColor> carColorModelParser;
+    private ModelValidator<CarColor> carColorModelValidator;
+    private String MODEL_NAME;
+
+    private RequestHandler<CarColor> requestHandler;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        this.modelService = (CarColorService) getServletContext().getAttribute("carcolorService");
-        this.modelParser = new JsonModelParser<>(CarColor.class);
-        this.modelValidator = new CarColorValidator();
-        this.pathParser = new LongPathParser();
-        this.modelName = "colors";
+        this.carColorModelValidator = (CarColorValidator) getServletContext().getAttribute("carcolorValidator");
+        this.carColorModelParser = (ModelParser<CarColor>) getServletContext().getAttribute("carcolorParser");
+        this.carColorStorageService = (CarColorService) getServletContext().getAttribute("carcolorService");
+        this.MODEL_NAME = "colors";
+        this.requestHandler = new RequestHandler<>(carColorStorageService, carColorModelParser, carColorModelValidator, MODEL_NAME);
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        this.requestHandler.handleGet(req, resp);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        throw new MethodNotAllowedException(String.format("Method %s not allowed", req.getMethod()));
     }
 
     @Override
@@ -38,31 +51,6 @@ public class CarColorServlet extends BaseServlet<CarColor, Long> {
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        resp.setContentType("application/json");
-        Long id_car = null;
-        Long id_color = null;
-
-        try{
-            id_car = Long.parseLong(req.getParameter("idCar"));
-            id_color = Long.parseLong(req.getParameter("idColor"));
-        }
-        catch (NumberFormatException ignored){}
-
-        if(id_car == null || id_color == null){
-            throw new ParametersParseException("Check input data");
-        }
-
-        QuerySpecification specification = new CarColorByIdsSpecification(id_car, id_color);
-        this.modelService.deleteBySpecification(specification);
-    }
-
-    @Override
-    protected List<CarColor> getModelFromDatabase(Long id) {
-        return this.modelService.query(new CarColorByCarIdSpecification(id));
-    }
-
-    @Override
-    protected void deleteModelFromDatabase(Long id) {
-
+        throw new MethodNotAllowedException(String.format("Method %s not allowed", req.getMethod()));
     }
 }

@@ -1,5 +1,8 @@
 package org.example.repositories;
 
+import org.example.criteria.SearchCriteria;
+import org.example.criteria.SearchOperator;
+import org.example.criteria.SpecificationBuilder;
 import org.example.database.DatabaseConnector;
 import org.example.exceptions.database.access.DatabaseDeleteException;
 import org.example.exceptions.database.access.DatabaseReadException;
@@ -49,12 +52,12 @@ public class CarVolumeSQLRepository implements CrudRepository<CarVolume> {
     }
 
     @Override
-    public void delete(QuerySpecification spec) {
-        String query = "delete from car_volume where " + spec.toSQLClauses();
+    public void deleteById(Long id) {
+        String query = "delete from car_volume where id = ?";
 
         try(Connection connection = databaseConnector.getConnection();
             PreparedStatement statement = connection.prepareStatement(query)) {
-
+            statement.setLong(1, id);
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -63,22 +66,34 @@ public class CarVolumeSQLRepository implements CrudRepository<CarVolume> {
     }
 
     @Override
-    public List<CarVolume> query(QuerySpecification spec) {
-        String query = String.format("select * from car_volume where %s ", spec.toSQLClauses());
+    public List<CarVolume> getById(Long id) {
+        return query(List.of(new SearchCriteria("id_volume", SearchOperator.EQUALS, id)));
+    }
+
+    @Override
+    public List<CarVolume> query(List<SearchCriteria> criteriaList) {
+        String query = "select * from car_volume where " + SpecificationBuilder.build(criteriaList);
 
         try(Connection connection = databaseConnector.getConnection();
             PreparedStatement statement = connection.prepareStatement(query)) {
 
-            ResultSet resultSet = statement.executeQuery();
-            List<CarVolume> resultList = new ArrayList<>();
-            while (resultSet.next()){
-                Long id_car = resultSet.getLong("id_car");
-                Long id_volume = resultSet.getLong("id_volume");
-
-                resultList.add(new CarVolume(id_car, id_volume));
+            int i = 1;
+            for(SearchCriteria criteria : criteriaList){
+                statement.setObject(i, criteria.getValue());
+                i++;
             }
-            resultSet.close();
-            return resultList;
+
+            try(ResultSet resultSet = statement.executeQuery()) {
+                List<CarVolume> resultList = new ArrayList<>();
+                while (resultSet.next()) {
+                    Long id_car = resultSet.getLong("id_car");
+                    Long id_volume = resultSet.getLong("id_volume");
+
+                    resultList.add(new CarVolume(id_car, id_volume));
+                }
+                resultSet.close();
+                return resultList;
+            }
 
         } catch (SQLException e) {
             e.printStackTrace();

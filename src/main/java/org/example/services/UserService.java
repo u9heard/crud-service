@@ -5,7 +5,6 @@ import org.example.interfaces.QuerySpecification;
 import org.example.interfaces.StorageService;
 import org.example.models.User;
 import org.example.repositories.UserSQLRepository;
-import org.example.specifications.user.UserByIdSpecification;
 
 import java.util.List;
 

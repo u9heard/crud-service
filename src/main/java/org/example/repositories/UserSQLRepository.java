@@ -1,17 +1,20 @@
 package org.example.repositories;
 
+import org.example.criteria.SearchCriteria;
+import org.example.criteria.SearchOperator;
+import org.example.criteria.SpecificationBuilder;
 import org.example.database.DatabaseConnector;
 import org.example.exceptions.database.access.DatabaseDeleteException;
 import org.example.exceptions.database.access.DatabaseReadException;
 import org.example.exceptions.database.access.DatabaseSaveException;
 import org.example.exceptions.database.access.DatabaseUpdateException;
 import org.example.interfaces.CrudRepository;
-import org.example.interfaces.QuerySpecification;
 import org.example.models.User;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class UserSQLRepository implements CrudRepository<User> {
 
@@ -77,12 +80,12 @@ public class UserSQLRepository implements CrudRepository<User> {
     }
 
     @Override
-    public void delete(QuerySpecification spec) {
-        String query = "delete from users where " + spec.toSQLClauses();
+    public void deleteById(Long id) {
+        String query = "delete from users where id = ?";
 
         try(Connection connection = databaseConnector.getConnection();
             PreparedStatement statement = connection.prepareStatement(query)) {
-
+            statement.setLong(1, id);
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -91,29 +94,43 @@ public class UserSQLRepository implements CrudRepository<User> {
     }
 
     @Override
-    public List<User> query(QuerySpecification spec) {
-        String query = "select * from users where " + spec.toSQLClauses();
+    public List<User> getById(Long id) {
+        return query(List.of(new SearchCriteria("id", SearchOperator.EQUALS, id)));
+    }
+
+    @Override
+    public List<User> query(List<SearchCriteria> criteriaList) {
+        String query = "select * from users where " + SpecificationBuilder.build(criteriaList);
 
         try(Connection connection = databaseConnector.getConnection();
             PreparedStatement statement = connection.prepareStatement(query)) {
-
-            ResultSet resultSet = statement.executeQuery();
-            List<User> resultList = new ArrayList<>();
-            while (resultSet.next()){
-                long id = resultSet.getLong("id");
-                String name = resultSet.getString("name");
-                String surname = resultSet.getString("surname");
-                String father_name = resultSet.getString("father_name");
-                LocalDate dob = resultSet.getDate("dob").toLocalDate();
-                String sex = resultSet.getString("sex");
-
-                resultList.add(new User(id, name, surname, father_name, dob, sex));
+            int i = 1;
+            for(SearchCriteria criteria : criteriaList){
+                statement.setObject(i, criteria.getValue());
+                i++;
             }
-            resultSet.close();
-            return resultList;
+
+            System.out.println(statement.toString());
+
+            try(ResultSet resultSet = statement.executeQuery()) {
+                List<User> resultList = new ArrayList<>();
+                while (resultSet.next()) {
+                    long id = resultSet.getLong("id");
+                    String name = resultSet.getString("name");
+                    String surname = resultSet.getString("surname");
+                    String father_name = resultSet.getString("father_name");
+                    LocalDate dob = resultSet.getDate("dob").toLocalDate();
+                    String sex = resultSet.getString("sex");
+
+                    resultList.add(new User(id, name, surname, father_name, dob, sex));
+                }
+                resultSet.close();
+                return resultList;
+            }
 
         } catch (SQLException e) {
             e.printStackTrace();
+            System.out.println(query);
             throw new DatabaseReadException(e.getMessage());
         }
     }

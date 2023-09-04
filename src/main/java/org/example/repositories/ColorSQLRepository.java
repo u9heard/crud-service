@@ -1,5 +1,8 @@
 package org.example.repositories;
 
+import org.example.criteria.SearchCriteria;
+import org.example.criteria.SearchOperator;
+import org.example.criteria.SpecificationBuilder;
 import org.example.database.DatabaseConnector;
 import org.example.exceptions.database.access.DatabaseDeleteException;
 import org.example.exceptions.database.access.DatabaseReadException;
@@ -61,12 +64,12 @@ public class ColorSQLRepository implements CrudRepository<Color> {
     }
 
     @Override
-    public void delete(QuerySpecification spec) {
-        String query = "delete from color where " + spec.toSQLClauses();
+    public void deleteById(Long id) {
+        String query = "delete from color where id = ?";
 
         try(Connection connection = databaseConnector.getConnection();
             PreparedStatement statement = connection.prepareStatement(query)) {
-
+            statement.setLong(1, id);
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -75,22 +78,34 @@ public class ColorSQLRepository implements CrudRepository<Color> {
     }
 
     @Override
-    public List<Color> query(QuerySpecification spec) {
-        String query = "select * from color where " + spec.toSQLClauses();
+    public List<Color> getById(Long id) {
+        return query(List.of(new SearchCriteria("id", SearchOperator.EQUALS, id)));
+    }
+
+    @Override
+    public List<Color> query(List<SearchCriteria> criteriaList) {
+        String query = "select * from color where " + SpecificationBuilder.build(criteriaList);
 
         try(Connection connection = databaseConnector.getConnection();
             PreparedStatement statement = connection.prepareStatement(query)) {
 
-            ResultSet resultSet = statement.executeQuery();
-            List<Color> resultList = new ArrayList<>();
-            while (resultSet.next()){
-                long id = resultSet.getLong("id");
-                String color = resultSet.getString("color");
-
-                resultList.add(new Color(id, color));
+            int i = 1;
+            for(SearchCriteria criteria : criteriaList){
+                statement.setObject(i, criteria.getValue());
+                i++;
             }
-            resultSet.close();
-            return resultList;
+
+            try(ResultSet resultSet = statement.executeQuery()) {
+                List<Color> resultList = new ArrayList<>();
+                while (resultSet.next()) {
+                    long id = resultSet.getLong("id");
+                    String color = resultSet.getString("color");
+
+                    resultList.add(new Color(id, color));
+                }
+                resultSet.close();
+                return resultList;
+            }
 
         } catch (SQLException e) {
             e.printStackTrace();

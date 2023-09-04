@@ -1,13 +1,13 @@
-package org.example.exceptions;
+package org.example.exceptions.parsers;
 
-public class PathParsingException extends RuntimeException{
+public class PathParseException extends RuntimeException{
     String path;
 
-    public PathParsingException(String message) {
+    public PathParseException(String message) {
         super(message);
     }
 
-    public PathParsingException(String message, String path) {
+    public PathParseException(String message, String path) {
         super(message);
         this.path = path;
     }

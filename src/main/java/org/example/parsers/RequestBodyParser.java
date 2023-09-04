@@ -1,8 +1,7 @@
 package org.example.parsers;
 
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import org.example.exceptions.parsers.BodyParseException;
 
 import java.io.BufferedReader;
 
@@ -15,7 +14,7 @@ public class RequestBodyParser {
                 requestBody.append(line);
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new BodyParseException("Can't parse request body");
         }
 
         return requestBody.toString();

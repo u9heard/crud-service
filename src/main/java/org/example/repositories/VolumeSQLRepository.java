@@ -1,5 +1,8 @@
 package org.example.repositories;
 
+import org.example.criteria.SearchCriteria;
+import org.example.criteria.SearchOperator;
+import org.example.criteria.SpecificationBuilder;
 import org.example.database.DatabaseConnector;
 import org.example.exceptions.database.access.DatabaseDeleteException;
 import org.example.exceptions.database.access.DatabaseReadException;
@@ -64,12 +67,12 @@ public class VolumeSQLRepository implements CrudRepository<Volume> {
     }
 
     @Override
-    public void delete(QuerySpecification spec) {
-        String query = "delete from volume where " + spec.toSQLClauses();
+    public void deleteById(Long id) {
+        String query = "delete from volume where id = ?";
 
         try(Connection connection = databaseConnector.getConnection();
             PreparedStatement statement = connection.prepareStatement(query)) {
-
+            statement.setLong(1, id);
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -78,22 +81,34 @@ public class VolumeSQLRepository implements CrudRepository<Volume> {
     }
 
     @Override
-    public List<Volume> query(QuerySpecification spec) {
-        String query = "select * from volume where " + spec.toSQLClauses();
+    public List<Volume> getById(Long id) {
+        return query(List.of(new SearchCriteria("id", SearchOperator.EQUALS, id)));
+    }
+
+    @Override
+    public List<Volume> query(List<SearchCriteria> criteriaList) {
+        String query = "select * from volume where " + SpecificationBuilder.build(criteriaList);
 
         try(Connection connection = databaseConnector.getConnection();
             PreparedStatement statement = connection.prepareStatement(query)) {
 
-            ResultSet resultSet = statement.executeQuery();
-            List<Volume> resultList = new ArrayList<>();
-            while (resultSet.next()){
-                long id = resultSet.getLong("id");
-                double vol = resultSet.getDouble("vol");
-
-                resultList.add(new Volume(id, vol));
+            int i = 1;
+            for(SearchCriteria criteria : criteriaList){
+                statement.setObject(i, criteria.getValue());
+                i++;
             }
-            resultSet.close();
-            return resultList;
+
+            try(ResultSet resultSet = statement.executeQuery()) {
+                List<Volume> resultList = new ArrayList<>();
+                while (resultSet.next()) {
+                    long id = resultSet.getLong("id");
+                    double vol = resultSet.getDouble("vol");
+
+                    resultList.add(new Volume(id, vol));
+                }
+                resultSet.close();
+                return resultList;
+            }
 
         } catch (SQLException e) {
             e.printStackTrace();

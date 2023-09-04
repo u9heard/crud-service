@@ -3,35 +3,53 @@ package org.example.servlets.volume;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.example.handlers.RequestHandler;
+import org.example.interfaces.ModelParser;
+import org.example.interfaces.ModelValidator;
+import org.example.interfaces.StorageService;
 import org.example.models.Volume;
-import org.example.parsers.JsonModelParser;
-import org.example.parsers.LongPathParser;
 import org.example.services.VolumeService;
-import org.example.servlets.BaseServlet;
-import org.example.specifications.DefaultByIdSpecification;
+import org.example.validators.UserValidator;
 import org.example.validators.VolumeValidator;
 
-import java.util.List;
+import java.io.IOException;
 
-public class VolumeServlet extends BaseServlet<Volume, Long> {
+public class VolumeServlet extends HttpServlet {
+    private StorageService<Volume> volumeStorageService;
+    private ModelParser<Volume> volumeModelParser;
+    private ModelValidator<Volume> volumeModelValidator;
+    private String MODEL_NAME;
+    private RequestHandler<Volume> requestHandler;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        this.modelService = (VolumeService) getServletContext().getAttribute("volumeService");
-        this.modelParser = new JsonModelParser<>(Volume.class);
-        this.modelValidator = new VolumeValidator();
-        this.pathParser = new LongPathParser();
-        this.modelName = "volume";
+        this.volumeModelValidator = (VolumeValidator) getServletContext().getAttribute("volumeValidator");
+        this.volumeModelParser = (ModelParser<Volume>) getServletContext().getAttribute("volumeParser");
+        this.volumeStorageService = (VolumeService) getServletContext().getAttribute("volumeService");
+        this.MODEL_NAME = "volume";
+        this.requestHandler = new RequestHandler<>(volumeStorageService, volumeModelParser, volumeModelValidator, MODEL_NAME);
     }
 
     @Override
-    protected List<Volume> getModelFromDatabase(Long id) {
-        return this.modelService.query(new DefaultByIdSpecification(id));
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        this.requestHandler.handleGet(req, resp);
     }
 
     @Override
-    protected void deleteModelFromDatabase(Long id) {
-        this.modelService.deleteById(id);
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        this.requestHandler.handlePost(req, resp);
+    }
+
+    @Override
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        this.requestHandler.handlePut(req, resp);
+    }
+
+    @Override
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        this.requestHandler.handleDelete(req, resp);
     }
 }

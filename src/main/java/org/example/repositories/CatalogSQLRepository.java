@@ -1,5 +1,8 @@
 package org.example.repositories;
 
+import org.example.criteria.SearchCriteria;
+import org.example.criteria.SearchOperator;
+import org.example.criteria.SpecificationBuilder;
 import org.example.database.DatabaseConnector;
 import org.example.exceptions.database.access.DatabaseDeleteException;
 import org.example.exceptions.database.access.DatabaseReadException;
@@ -70,12 +73,12 @@ public class CatalogSQLRepository implements CrudRepository<Catalog> {
         }
     }
 
-    public void delete(QuerySpecification spec){
-        String query = "delete from catalog where " + spec.toSQLClauses();
+    public void deleteById(Long id){
+        String query = "delete from catalog where id = ?";
 
         try(Connection connection = databaseConnector.getConnection();
             PreparedStatement statement = connection.prepareStatement(query)) {
-
+            statement.setLong(1, id);
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -84,25 +87,37 @@ public class CatalogSQLRepository implements CrudRepository<Catalog> {
     }
 
     @Override
-    public List<Catalog> query(QuerySpecification spec) {
-        String query = "select * from catalog where " + spec.toSQLClauses();
+    public List<Catalog> getById(Long id) {
+        return query(List.of(new SearchCriteria("id", SearchOperator.EQUALS, id)));
+    }
+
+    @Override
+    public List<Catalog> query(List<SearchCriteria> criteriaList) {
+        String query = "select * from catalog where " + SpecificationBuilder.build(criteriaList);
 
         try(Connection connection = databaseConnector.getConnection();
             PreparedStatement statement = connection.prepareStatement(query)) {
 
-            ResultSet resultSet = statement.executeQuery();
-            List<Catalog> resultList = new ArrayList<>();
-            while (resultSet.next()){
-                long id = resultSet.getLong("id");
-                String brand = resultSet.getString("brand");
-                String model = resultSet.getString("model");
-                LocalDate release_date = resultSet.getDate("release_date").toLocalDate();
-                BigDecimal price = resultSet.getBigDecimal("price");
-
-                resultList.add(new Catalog(id, brand, model, release_date, price));
+            int i = 1;
+            for(SearchCriteria criteria : criteriaList){
+                statement.setObject(i, criteria.getValue());
+                i++;
             }
-            resultSet.close();
-            return resultList;
+
+            try(ResultSet resultSet = statement.executeQuery()) {
+                List<Catalog> resultList = new ArrayList<>();
+                while (resultSet.next()) {
+                    long id = resultSet.getLong("id");
+                    String brand = resultSet.getString("brand");
+                    String model = resultSet.getString("model");
+                    LocalDate release_date = resultSet.getDate("release_date").toLocalDate();
+                    BigDecimal price = resultSet.getBigDecimal("price");
+
+                    resultList.add(new Catalog(id, brand, model, release_date, price));
+                }
+                resultSet.close();
+                return resultList;
+            }
 
         } catch (SQLException e) {
             e.printStackTrace();

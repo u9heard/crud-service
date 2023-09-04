@@ -1,5 +1,8 @@
 package org.example.repositories;
 
+import org.example.criteria.SearchCriteria;
+import org.example.criteria.SearchOperator;
+import org.example.criteria.SpecificationBuilder;
 import org.example.database.DatabaseConnector;
 import org.example.exceptions.database.access.DatabaseDeleteException;
 import org.example.exceptions.database.access.DatabaseReadException;
@@ -8,10 +11,7 @@ import org.example.interfaces.CrudRepository;
 import org.example.interfaces.QuerySpecification;
 import org.example.models.CarColor;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,12 +48,12 @@ public class CarColorSQLRepository implements CrudRepository<CarColor> {
     }
 
     @Override
-    public void delete(QuerySpecification spec) {
-        String query = "delete from car_color where " + spec.toSQLClauses();
+    public void deleteById(Long id) {
+        String query = "delete from car_color where id = ?";
 
         try(Connection connection = databaseConnector.getConnection();
             PreparedStatement statement = connection.prepareStatement(query)) {
-
+            statement.setLong(1, id);
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -62,22 +62,35 @@ public class CarColorSQLRepository implements CrudRepository<CarColor> {
     }
 
     @Override
-    public List<CarColor> query(QuerySpecification spec) {
-        String query = String.format("select * from car_color where %s", spec.toSQLClauses());
+    public List<CarColor> getById(Long id) {
+        return query(List.of(new SearchCriteria("id_car", SearchOperator.EQUALS, id)));
+    }
+
+    @Override
+    public List<CarColor> query(List<SearchCriteria> criteriaList) {
+
+        String query = "select * from car_color where " + SpecificationBuilder.build(criteriaList);
 
         try(Connection connection = databaseConnector.getConnection();
             PreparedStatement statement = connection.prepareStatement(query)) {
 
-            ResultSet resultSet = statement.executeQuery();
-            List<CarColor> resultList = new ArrayList<>();
-            while (resultSet.next()){
-                Long id_car = resultSet.getLong("id_car");
-                Long id_color = resultSet.getLong("id_color");
-
-                resultList.add(new CarColor(id_car, id_color));
+            int i = 1;
+            for(SearchCriteria criteria : criteriaList){
+                statement.setObject(i, criteria.getValue());
+                i++;
             }
-            resultSet.close();
-            return resultList;
+
+            try(ResultSet resultSet = statement.executeQuery()) {
+
+                List<CarColor> resultList = new ArrayList<>();
+                while (resultSet.next()) {
+                    Long id_car = resultSet.getLong("id_car");
+                    Long id_color = resultSet.getLong("id_color");
+
+                    resultList.add(new CarColor(id_car, id_color));
+                }
+                return resultList;
+            }
 
         } catch (SQLException e) {
             e.printStackTrace();

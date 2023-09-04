@@ -2,35 +2,56 @@ package org.example.servlets.color;
 
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.example.handlers.RequestHandler;
+import org.example.interfaces.ModelParser;
+import org.example.interfaces.ModelValidator;
+import org.example.interfaces.StorageService;
 import org.example.models.Color;
-import org.example.parsers.JsonModelParser;
-import org.example.parsers.LongPathParser;
+import org.example.models.User;
 import org.example.services.ColorService;
-import org.example.servlets.BaseServlet;
-import org.example.specifications.DefaultByIdSpecification;
+import org.example.services.UserService;
 import org.example.validators.ColorValidator;
+import org.example.validators.UserValidator;
 
-import java.util.List;
+import java.io.IOException;
 
-public class ColorServlet extends BaseServlet<Color, Long> {
+public class ColorServlet extends HttpServlet {
+    private StorageService<Color> colorStorageService;
+    private ModelParser<Color> colorModelParser;
+    private ModelValidator<Color> colorModelValidator;
+    private String MODEL_NAME;
+    private RequestHandler<Color> requestHandler;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        this.modelService = (ColorService) getServletContext().getAttribute("colorService");
-        this.modelParser = new JsonModelParser<>(Color.class);
-        this.modelValidator = new ColorValidator();
-        this.pathParser = new LongPathParser();
-        this.modelName = "color";
+        this.colorModelValidator = (ColorValidator) getServletContext().getAttribute("colorValidator");
+        this.colorModelParser = (ModelParser<Color>) getServletContext().getAttribute("colorParser");
+        this.colorStorageService = (ColorService) getServletContext().getAttribute("colorService");
+        this.MODEL_NAME = "color";
+        this.requestHandler = new RequestHandler<>(colorStorageService, colorModelParser, colorModelValidator, MODEL_NAME);
     }
 
     @Override
-    protected List<Color> getModelFromDatabase(Long id) {
-        return this.modelService.query(new DefaultByIdSpecification(id));
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        this.requestHandler.handleGet(req, resp);
     }
 
     @Override
-    protected void deleteModelFromDatabase(Long id) {
-        this.modelService.deleteById(id);
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        this.requestHandler.handlePost(req, resp);
+    }
+
+    @Override
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        this.requestHandler.handlePut(req, resp);
+    }
+
+    @Override
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        this.requestHandler.handleDelete(req, resp);
     }
 }

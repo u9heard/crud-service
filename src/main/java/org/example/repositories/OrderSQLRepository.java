@@ -1,5 +1,8 @@
 package org.example.repositories;
 
+import org.example.criteria.SearchCriteria;
+import org.example.criteria.SearchOperator;
+import org.example.criteria.SpecificationBuilder;
 import org.example.database.DatabaseConnector;
 import org.example.exceptions.database.access.DatabaseDeleteException;
 import org.example.exceptions.database.access.DatabaseReadException;
@@ -73,12 +76,12 @@ public class OrderSQLRepository implements CrudRepository<Order> {
     }
 
     @Override
-    public void delete(QuerySpecification spec) {
-        String query = "delete from orders where " + spec.toSQLClauses();
+    public void deleteById(Long id) {
+        String query = "delete from orders where id = ?";
 
         try(Connection connection = databaseConnector.getConnection();
             PreparedStatement statement = connection.prepareStatement(query)) {
-
+            statement.setLong(1, id);
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -87,25 +90,37 @@ public class OrderSQLRepository implements CrudRepository<Order> {
     }
 
     @Override
-    public List<Order> query(QuerySpecification spec) {
-        String query = "select * from orders where " + spec.toSQLClauses();
+    public List<Order> getById(Long id) {
+        return query(List.of(new SearchCriteria("id", SearchOperator.EQUALS, id)));
+    }
+
+    @Override
+    public List<Order> query(List<SearchCriteria> criteriaList) {
+        String query = "select * from orders where " + SpecificationBuilder.build(criteriaList);
 
         try(Connection connection = databaseConnector.getConnection();
             PreparedStatement statement = connection.prepareStatement(query)) {
 
-            ResultSet resultSet = statement.executeQuery();
-            List<Order> resultList = new ArrayList<>();
-            while (resultSet.next()){
-                Long id = resultSet.getLong("id");
-                Long id_user = resultSet.getLong("id_user");
-                Long id_car = resultSet.getLong("id_car");
-                Long id_color = resultSet.getLong("id_color");
-                Long id_vol = resultSet.getLong("id_vol");
-                LocalDate date_buy = resultSet.getDate("date_buy").toLocalDate();
-                resultList.add(new Order(id, id_user, id_car, id_vol, id_color, date_buy));
+            int i = 1;
+            for(SearchCriteria criteria : criteriaList){
+                statement.setObject(i, criteria.getValue());
+                i++;
             }
-            resultSet.close();
-            return resultList;
+
+            try(ResultSet resultSet = statement.executeQuery()) {
+                List<Order> resultList = new ArrayList<>();
+                while (resultSet.next()) {
+                    Long id = resultSet.getLong("id");
+                    Long id_user = resultSet.getLong("id_user");
+                    Long id_car = resultSet.getLong("id_car");
+                    Long id_color = resultSet.getLong("id_color");
+                    Long id_vol = resultSet.getLong("id_vol");
+                    LocalDate date_buy = resultSet.getDate("date_buy").toLocalDate();
+                    resultList.add(new Order(id, id_user, id_car, id_vol, id_color, date_buy));
+                }
+                resultSet.close();
+                return resultList;
+            }
 
         } catch (SQLException e) {
             e.printStackTrace();

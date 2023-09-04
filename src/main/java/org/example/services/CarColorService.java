@@ -1,5 +1,7 @@
 package org.example.services;
 
+import org.example.criteria.SearchCriteria;
+import org.example.criteria.SearchOperator;
 import org.example.exceptions.database.service.ModelConflictException;
 import org.example.interfaces.CrudRepository;
 import org.example.interfaces.QuerySpecification;
@@ -7,8 +9,6 @@ import org.example.interfaces.StorageService;
 import org.example.models.CarColor;
 import org.example.models.Catalog;
 import org.example.models.Color;
-import org.example.specifications.catalog.CatalogByIdSpecification;
-import org.example.specifications.color.ColorByIdSpecification;
 
 import java.util.List;
 
@@ -38,10 +38,10 @@ public class CarColorService extends StorageService<CarColor> {
 
 
     private boolean checkCatalog(Long id){
-        return !this.catalogRepository.query(new CatalogByIdSpecification(id)).isEmpty();
+        return !this.catalogRepository.query(List.of(new SearchCriteria("id", SearchOperator.EQUALS, id))).isEmpty();
     }
 
     private boolean checkColor(Long id){
-        return !this.colorRepository.query(new ColorByIdSpecification(id)).isEmpty();
+        return !this.colorRepository.query(List.of(new SearchCriteria("id", SearchOperator.EQUALS, id))).isEmpty();
     }
 }
