@@ -33,9 +33,7 @@ public class RequestHandler<T> {
 
     public void handleGet(HttpServletRequest req, HttpServletResponse resp){
         resp.setContentType("application/json");
-        System.out.println("fff");
         List<T> resultList = getModelByRequest(req);
-        System.out.println("ddd");
         String jsonResponse = getJson(resultList);
         try(PrintWriter writer = resp.getWriter()) {
             writer.write(jsonResponse);
