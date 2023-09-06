@@ -1,8 +1,5 @@
 package org.example.repositories;
 
-import org.example.criteria.SearchCriteria;
-import org.example.criteria.SearchOperator;
-import org.example.criteria.SpecificationBuilder;
 import org.example.database.DatabaseConnector;
 import org.example.exceptions.database.access.DatabaseDeleteException;
 import org.example.exceptions.database.access.DatabaseReadException;
@@ -153,8 +150,6 @@ public class UserSQLRepository implements CrudRepository<User> {
                 statement.setObject(i+1, parameterList.get(i));
             }
 
-            System.out.println(statement.toString());
-
             try(ResultSet resultSet = statement.executeQuery()) {
                 List<User> resultList = new ArrayList<>();
                 while (resultSet.next()) {
@@ -173,7 +168,6 @@ public class UserSQLRepository implements CrudRepository<User> {
 
         } catch (SQLException e) {
             e.printStackTrace();
-            System.out.println(query);
             throw new DatabaseReadException(e.getMessage());
         }
     }

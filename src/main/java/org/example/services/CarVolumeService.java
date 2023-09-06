@@ -1,7 +1,5 @@
 package org.example.services;
 
-import org.example.criteria.SearchCriteria;
-import org.example.criteria.SearchOperator;
 import org.example.exceptions.database.service.ModelConflictException;
 import org.example.exceptions.database.service.ModelNotFoundException;
 import org.example.interfaces.CrudRepository;
@@ -44,7 +42,7 @@ public class CarVolumeService extends StorageService<CarVolume> {
         CarVolume searchModel = new CarVolume();
         searchModel.setIdCar(id);
 
-        return query(searchModel);
+        return modelRepository.query(searchModel);
     }
 
     public void deleteByIdCarIdVolume(Long id_car, Long id_volume){
@@ -52,7 +50,7 @@ public class CarVolumeService extends StorageService<CarVolume> {
         searchModel.setIdCar(id_car);
         searchModel.setIdVolume(id_volume);
 
-        List<CarVolume> resiltList = query(searchModel);
+        List<CarVolume> resiltList = this.modelRepository.query(searchModel);
 
         if(resiltList.isEmpty()){
             throw new ModelNotFoundException(String.format("Model with id_car = %s, id_volume = %s", id_car, id_volume));

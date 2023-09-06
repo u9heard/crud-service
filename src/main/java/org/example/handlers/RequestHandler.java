@@ -35,7 +35,6 @@ public class RequestHandler<T> {
     public void handleGet(HttpServletRequest req, HttpServletResponse resp){
         resp.setContentType("application/json");
         List<T> resultList = getModelByRequest(req);
-        System.out.println(resultList.get(0));
         String jsonResponse = getJson(resultList);
         try(PrintWriter writer = resp.getWriter()) {
             writer.write(jsonResponse);

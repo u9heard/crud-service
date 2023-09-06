@@ -1,8 +1,5 @@
 package org.example.repositories;
 
-import org.example.criteria.SearchCriteria;
-import org.example.criteria.SearchOperator;
-import org.example.criteria.SpecificationBuilder;
 import org.example.database.DatabaseConnector;
 import org.example.exceptions.database.access.DatabaseDeleteException;
 import org.example.exceptions.database.access.DatabaseReadException;

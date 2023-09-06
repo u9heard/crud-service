@@ -1,8 +1,6 @@
 package org.example.handlers;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.example.criteria.SearchCriteria;
-import org.example.criteria.SearchOperator;
 import org.example.interfaces.ConvertModelStrategy;
 import org.example.interfaces.ModelParser;
 import org.example.interfaces.ModelValidator;

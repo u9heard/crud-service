@@ -15,7 +15,6 @@ public class LongPathParser implements PathParser<Long> {
             throw new PathParseException("Unable to parse empty path");
         }
         String [] peaces = path.split("/");
-        System.out.println(path.isEmpty());
         try {
             if(peaces.length > position && position >= 0){
                     Long result = Long.parseLong(peaces[position]);

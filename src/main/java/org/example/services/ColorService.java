@@ -1,7 +1,5 @@
 package org.example.services;
 
-import org.example.criteria.SearchCriteria;
-import org.example.criteria.SearchOperator;
 import org.example.exceptions.database.service.ModelConflictException;
 import org.example.interfaces.CrudRepository;
 import org.example.models.Color;
