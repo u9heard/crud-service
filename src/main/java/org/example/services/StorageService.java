@@ -30,7 +30,7 @@ public abstract class StorageService<T> {
     public List<T> query(T criteriaModel){
         List<T> resultList = this.modelRepository.query(criteriaModel);
         if(resultList.isEmpty()){
-            throw new ModelNotFoundException(String.format("Model not found, specification = \"%s\"", criteriaModel.toString()));
+            throw new ModelNotFoundException("Model not found");
         }
         return resultList;
     }
