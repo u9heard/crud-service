@@ -15,6 +15,7 @@ import org.example.models.Volume;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class VolumeSQLRepository implements CrudRepository<Volume> {
 
@@ -67,7 +68,7 @@ public class VolumeSQLRepository implements CrudRepository<Volume> {
     }
 
     @Override
-    public void deleteById(Long id) {
+    public void delete(Long id) {
         String query = "delete from volume where id = ?";
 
         try(Connection connection = databaseConnector.getConnection();
@@ -81,21 +82,35 @@ public class VolumeSQLRepository implements CrudRepository<Volume> {
     }
 
     @Override
-    public List<Volume> getById(Long id) {
-        return query(List.of(new SearchCriteria("id", SearchOperator.EQUALS, id)));
+    public Volume read(Long id) {
+        Volume searchVolume = new Volume();
+        searchVolume.setId(id);
+        return query(searchVolume).stream().findFirst().orElse(null);
     }
 
     @Override
-    public List<Volume> query(List<SearchCriteria> criteriaList) {
-        String query = "select * from volume where " + SpecificationBuilder.build(criteriaList);
+    public List<Volume> query(Volume criteriaModel) {
+        StringBuilder query = new StringBuilder("select * from volume where ");
+        List<Object> parameterList = new ArrayList<>();
+
+        if(criteriaModel.getId() != null){
+            query.append("id = ? ");
+            parameterList.add(criteriaModel.getId());
+        }
+        if(criteriaModel.getVolume() != null){
+            if(!parameterList.isEmpty()){
+                query.append(" and ");
+            }
+            query.append("vol = ? ");
+            parameterList.add(criteriaModel.getVolume());
+        }
+
 
         try(Connection connection = databaseConnector.getConnection();
-            PreparedStatement statement = connection.prepareStatement(query)) {
+            PreparedStatement statement = connection.prepareStatement(query.toString())) {
 
-            int i = 1;
-            for(SearchCriteria criteria : criteriaList){
-                statement.setObject(i, criteria.getValue());
-                i++;
+            for(int i=0; i<parameterList.size(); i++){
+                statement.setObject(i+1, parameterList.get(i));
             }
 
             try(ResultSet resultSet = statement.executeQuery()) {

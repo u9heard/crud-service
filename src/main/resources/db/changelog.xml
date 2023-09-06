@@ -12,4 +12,7 @@
     <changeSet id="3" author="im">
         <sqlFile path="sql/alter_catalog.sql" relativeToChangelogFile="true" />
     </changeSet>
+    <changeSet id="4" author="im">
+        <sqlFile path="sql/alter_carcolor_carvolume.sql" relativeToChangelogFile="true" />
+    </changeSet>
 </databaseChangeLog>

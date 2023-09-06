@@ -8,18 +8,17 @@ import java.util.List;
 
 public class CarVolumeValidator implements ModelValidator<CarVolume> {
     @Override
-    public boolean validate(CarVolume model) {
+    public boolean validateOnInsert(CarVolume model) {
         return validateIdCar(model) && validateIdVolume(model);
     }
 
     @Override
-    public boolean validateAll(List<CarVolume> modelList) {
-        for(CarVolume carVolume : modelList){
-            if(!validate(carVolume))
-                return false;
-        }
+    public boolean validateOnUpdate(CarVolume model) {
+        return validateIdCar(model) && validateIdVolume(model) && validateId(model);
+    }
 
-        return true;
+    private boolean validateId(CarVolume model){
+        return model.getId() != null && model.getId() >=1;
     }
 
     private boolean validateIdCar(CarVolume model){

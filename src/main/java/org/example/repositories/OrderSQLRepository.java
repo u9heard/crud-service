@@ -76,7 +76,7 @@ public class OrderSQLRepository implements CrudRepository<Order> {
     }
 
     @Override
-    public void deleteById(Long id) {
+    public void delete(Long id) {
         String query = "delete from orders where id = ?";
 
         try(Connection connection = databaseConnector.getConnection();
@@ -90,21 +90,56 @@ public class OrderSQLRepository implements CrudRepository<Order> {
     }
 
     @Override
-    public List<Order> getById(Long id) {
-        return query(List.of(new SearchCriteria("id", SearchOperator.EQUALS, id)));
+    public Order read(Long id) {
+        Order searchOrder = new Order();
+        searchOrder.setId(id);
+        return query(searchOrder).stream().findFirst().orElse(null);
     }
 
     @Override
-    public List<Order> query(List<SearchCriteria> criteriaList) {
-        String query = "select * from orders where " + SpecificationBuilder.build(criteriaList);
+    public List<Order> query(Order criteriaModel) {
+        StringBuilder query = new StringBuilder("select * from orders where ");
+        List<Object> parameterList = new ArrayList<>();
+
+        if(criteriaModel.getId() != null){
+            query.append("id = ? ");
+            parameterList.add(criteriaModel.getId());
+        }
+        if(criteriaModel.getIdCar() != null){
+            if(!parameterList.isEmpty()){
+                query.append(" and ");
+            }
+            query.append("id_car = ? ");
+            parameterList.add(criteriaModel.getIdCar());
+        }
+        if(criteriaModel.getIdUser() != null){
+            if(!parameterList.isEmpty()){
+                query.append(" and ");
+            }
+            query.append("id_user = ? ");
+            parameterList.add(criteriaModel.getIdUser());
+        }
+        if(criteriaModel.getIdColor() != null){
+            if(!parameterList.isEmpty()){
+                query.append(" and ");
+            }
+            query.append("id_color = ? ");
+            parameterList.add(criteriaModel.getIdColor());
+        }
+        if(criteriaModel.getIdVolume() != null){
+            if(!parameterList.isEmpty()){
+                query.append(" and ");
+            }
+            query.append("id_volume = ? ");
+            parameterList.add(criteriaModel.getIdVolume());
+        }
+
 
         try(Connection connection = databaseConnector.getConnection();
-            PreparedStatement statement = connection.prepareStatement(query)) {
+            PreparedStatement statement = connection.prepareStatement(query.toString())) {
 
-            int i = 1;
-            for(SearchCriteria criteria : criteriaList){
-                statement.setObject(i, criteria.getValue());
-                i++;
+            for(int i=0; i<parameterList.size(); i++){
+                statement.setObject(i+1, parameterList.get(i));
             }
 
             try(ResultSet resultSet = statement.executeQuery()) {

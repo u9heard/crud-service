@@ -7,9 +7,8 @@ import java.util.List;
 
 public class OrderValidator implements ModelValidator<Order> {
     @Override
-    public boolean validate(Order model) {
-        return validateId(model) &&
-                validateIdUser(model) &&
+    public boolean validateOnInsert(Order model) {
+        return validateIdUser(model) &&
                 validateIdCatalog(model) &&
                 validateIdColor(model) &&
                 validateIdVolume(model) &&
@@ -17,13 +16,8 @@ public class OrderValidator implements ModelValidator<Order> {
     }
 
     @Override
-    public boolean validateAll(List<Order> modelList) {
-        for(Order order : modelList){
-            if(!validate(order))
-                return false;
-        }
-
-        return true;
+    public boolean validateOnUpdate(Order model) {
+        return validateId(model) && validateOnInsert(model);
     }
 
     private boolean validateId(Order model){

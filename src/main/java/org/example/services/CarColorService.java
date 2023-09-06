@@ -2,10 +2,10 @@ package org.example.services;
 
 import org.example.criteria.SearchCriteria;
 import org.example.criteria.SearchOperator;
+import org.example.exceptions.ModelNotFullException;
 import org.example.exceptions.database.service.ModelConflictException;
+import org.example.exceptions.database.service.ModelNotFoundException;
 import org.example.interfaces.CrudRepository;
-import org.example.interfaces.QuerySpecification;
-import org.example.interfaces.StorageService;
 import org.example.models.CarColor;
 import org.example.models.Catalog;
 import org.example.models.Color;
@@ -26,22 +26,50 @@ public class CarColorService extends StorageService<CarColor> {
         if(checkCatalog(carColor.getIdCar()) && checkColor(carColor.getIdColor())){
             this.modelRepository.save(carColor);
         }
-        throw new ModelConflictException("Unique check failed");
+        else {
+            throw new ModelConflictException("Unique check failed");
+        }
     }
 
     public void update(CarColor carColor){
         if(checkCatalog(carColor.getIdCar()) && checkColor(carColor.getIdColor())){
             this.modelRepository.update(carColor);
         }
-        throw new ModelConflictException("Unique check failed");
+        else {
+            throw new ModelConflictException("Unique check failed");
+        }
     }
 
+    public List<CarColor> getByCarId(Long id){
+        CarColor searchModel = new CarColor();
+        searchModel.setIdCar(id);
+
+        return query(searchModel);
+    }
+
+    public void deleteByIdCarIdColor(Long id_car, Long id_color){
+        CarColor searchModel = new CarColor();
+        searchModel.setIdCar(id_car);
+        searchModel.setIdColor(id_color);
+
+        List<CarColor> resiltList = query(searchModel);
+
+        if(resiltList.isEmpty()){
+            throw new ModelNotFoundException(String.format("Model with id_car = %s, id_color = %s", id_car, id_color));
+        }
+
+        deleteById(resiltList.stream().findFirst().get().getId());
+    }
 
     private boolean checkCatalog(Long id){
-        return !this.catalogRepository.query(List.of(new SearchCriteria("id", SearchOperator.EQUALS, id))).isEmpty();
+        Catalog searchCatalog = new Catalog();
+        searchCatalog.setId(id);
+        return !this.catalogRepository.query(searchCatalog).isEmpty();
     }
 
     private boolean checkColor(Long id){
-        return !this.colorRepository.query(List.of(new SearchCriteria("id", SearchOperator.EQUALS, id))).isEmpty();
+        Color searchColor = new Color();
+        searchColor.setId(id);
+        return !this.colorRepository.query(searchColor).isEmpty();
     }
 }

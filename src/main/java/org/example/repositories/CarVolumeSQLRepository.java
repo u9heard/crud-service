@@ -9,6 +9,7 @@ import org.example.exceptions.database.access.DatabaseReadException;
 import org.example.exceptions.database.access.DatabaseSaveException;
 import org.example.interfaces.CrudRepository;
 import org.example.interfaces.QuerySpecification;
+import org.example.models.CarColor;
 import org.example.models.CarVolume;
 
 import java.sql.Connection;
@@ -17,6 +18,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class CarVolumeSQLRepository implements CrudRepository<CarVolume> {
 
@@ -52,7 +54,7 @@ public class CarVolumeSQLRepository implements CrudRepository<CarVolume> {
     }
 
     @Override
-    public void deleteById(Long id) {
+    public void delete(Long id) {
         String query = "delete from car_volume where id = ?";
 
         try(Connection connection = databaseConnector.getConnection();
@@ -66,32 +68,52 @@ public class CarVolumeSQLRepository implements CrudRepository<CarVolume> {
     }
 
     @Override
-    public List<CarVolume> getById(Long id) {
-        return query(List.of(new SearchCriteria("id_volume", SearchOperator.EQUALS, id)));
+    public CarVolume read(Long id) {
+        CarVolume searchModel = new CarVolume();
+        searchModel.setId(id);
+        return query(searchModel).stream().findFirst().orElse(null);
     }
 
     @Override
-    public List<CarVolume> query(List<SearchCriteria> criteriaList) {
-        String query = "select * from car_volume where " + SpecificationBuilder.build(criteriaList);
+    public List<CarVolume> query(CarVolume criteriaModel) {
+        StringBuilder query = new StringBuilder("select * from car_volume where ");
+        List<Object> parametersList = new ArrayList<>();
+
+        if(criteriaModel.getId() != null){
+            query.append("id = ? ");
+            parametersList.add(criteriaModel.getId());
+        }
+        if(criteriaModel.getIdCar() != null){
+            if(!parametersList.isEmpty()){
+                query.append(" and ");
+            }
+            query.append("id_car = ? ");
+            parametersList.add(criteriaModel.getIdCar());
+        }
+        if(criteriaModel.getIdVolume() != null){
+            if(!parametersList.isEmpty()){
+                query.append(" and ");
+            }
+            query.append("id_volume = ?");
+            parametersList.add(criteriaModel.getIdVolume());
+        }
 
         try(Connection connection = databaseConnector.getConnection();
-            PreparedStatement statement = connection.prepareStatement(query)) {
+            PreparedStatement statement = connection.prepareStatement(query.toString())) {
 
-            int i = 1;
-            for(SearchCriteria criteria : criteriaList){
-                statement.setObject(i, criteria.getValue());
-                i++;
+            for(int i=0; i<parametersList.size(); i++){
+                statement.setObject(i+1, parametersList.get(i));
             }
 
             try(ResultSet resultSet = statement.executeQuery()) {
                 List<CarVolume> resultList = new ArrayList<>();
                 while (resultSet.next()) {
+                    Long id = resultSet.getLong("id");
                     Long id_car = resultSet.getLong("id_car");
                     Long id_volume = resultSet.getLong("id_volume");
 
-                    resultList.add(new CarVolume(id_car, id_volume));
+                    resultList.add(new CarVolume(id, id_car, id_volume));
                 }
-                resultSet.close();
                 return resultList;
             }
 

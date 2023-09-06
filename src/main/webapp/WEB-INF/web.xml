@@ -55,6 +55,14 @@
     <servlet-class>org.example.servlets.color.ColorServlet</servlet-class>
   </servlet>
   <servlet>
+    <servlet-name>CarColorByCarIdServlet</servlet-name>
+    <servlet-class>org.example.servlets.carcolor.CarColorByCarIdServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>CarVolumeByCarIdServlet</servlet-name>
+    <servlet-class>org.example.servlets.carvolume.CarVolumeByCarIdServlet</servlet-class>
+  </servlet>
+  <servlet>
     <servlet-name>CarColorServlet</servlet-name>
     <servlet-class>org.example.servlets.carcolor.CarColorServlet</servlet-class>
   </servlet>
@@ -96,8 +104,16 @@
     <url-pattern>/carcolor/*</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
+    <servlet-name>CarColorByCarIdServlet</servlet-name>
+    <url-pattern>/carcolor/car/*</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
     <servlet-name>CarVolumeServlet</servlet-name>
     <url-pattern>/carvolume/*</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>CarVolumeByCarIdServlet</servlet-name>
+    <url-pattern>/carvolume/car/*</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
     <servlet-name>OrderServlet</servlet-name>

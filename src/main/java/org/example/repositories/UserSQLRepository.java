@@ -14,6 +14,7 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class UserSQLRepository implements CrudRepository<User> {
@@ -80,7 +81,7 @@ public class UserSQLRepository implements CrudRepository<User> {
     }
 
     @Override
-    public void deleteById(Long id) {
+    public void delete(Long id) {
         String query = "delete from users where id = ?";
 
         try(Connection connection = databaseConnector.getConnection();
@@ -94,20 +95,62 @@ public class UserSQLRepository implements CrudRepository<User> {
     }
 
     @Override
-    public List<User> getById(Long id) {
-        return query(List.of(new SearchCriteria("id", SearchOperator.EQUALS, id)));
+    public User read(Long id) {
+        User searchUser = new User();
+        searchUser.setId(id);
+        return query(searchUser).stream().findFirst().orElse(null);
     }
 
     @Override
-    public List<User> query(List<SearchCriteria> criteriaList) {
-        String query = "select * from users where " + SpecificationBuilder.build(criteriaList);
+    public List<User> query(User criteriaModel) {
+        StringBuilder query = new StringBuilder("select * from users where ");
+        List<Object> parameterList = new ArrayList<>();
+
+        if(criteriaModel.getId() != null){
+            query.append("id = ? ");
+            parameterList.add(criteriaModel.getId());
+        }
+        if(criteriaModel.getName() != null){
+            if(!parameterList.isEmpty()){
+                query.append(" and ");
+            }
+            query.append("name = ? ");
+            parameterList.add(criteriaModel.getName());
+        }
+        if(criteriaModel.getSurname() != null){
+            if(!parameterList.isEmpty()){
+                query.append(" and ");
+            }
+            query.append("surname = ? ");
+            parameterList.add(criteriaModel.getSurname());
+        }
+        if(criteriaModel.getFather_name() != null){
+            if(!parameterList.isEmpty()){
+                query.append(" and ");
+            }
+            query.append("father_name = ? ");
+            parameterList.add(criteriaModel.getFather_name());
+        }
+        if(criteriaModel.getDob() != null){
+            if(!parameterList.isEmpty()){
+                query.append(" and ");
+            }
+            query.append("dob = ? ");
+            parameterList.add(criteriaModel.getDob());
+        }
+        if(criteriaModel.getSex() != null){
+            if(!parameterList.isEmpty()){
+                query.append(" and ");
+            }
+            query.append("sex = ?");
+            parameterList.add(criteriaModel.getSex());
+        }
 
         try(Connection connection = databaseConnector.getConnection();
-            PreparedStatement statement = connection.prepareStatement(query)) {
-            int i = 1;
-            for(SearchCriteria criteria : criteriaList){
-                statement.setObject(i, criteria.getValue());
-                i++;
+            PreparedStatement statement = connection.prepareStatement(query.toString())) {
+
+            for(int i=0; i<parameterList.size(); i++){
+                statement.setObject(i+1, parameterList.get(i));
             }
 
             System.out.println(statement.toString());

@@ -7,18 +7,13 @@ import java.util.List;
 
 public class ColorValidator implements ModelValidator<Color> {
     @Override
-    public boolean validate(Color model) {
+    public boolean validateOnInsert(Color model) {
         return validateId(model) && validateColor(model);
     }
 
     @Override
-    public boolean validateAll(List<Color> modelList) {
-        for(Color col : modelList){
-            if(!validate(col))
-                return false;
-        }
-
-        return true;
+    public boolean validateOnUpdate(Color model) {
+        return validateColor(model);
     }
 
     private boolean validateId(Color model){

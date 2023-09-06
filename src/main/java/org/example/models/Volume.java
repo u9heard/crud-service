@@ -5,7 +5,7 @@ public class Volume {
     private Double volume;
 
     public Volume(){
-        this.id = 0L;
+
     }
 
     public Volume(Long id, Double volume) {

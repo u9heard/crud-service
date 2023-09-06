@@ -11,24 +11,21 @@ public class CatalogValidator implements ModelValidator<Catalog> {
 
     }
     @Override
-    public boolean validate(Catalog model) {
+    public boolean validateOnInsert(Catalog model) {
         if(model == null){
             return false;
         }
-        return validateId(model) &&
-                validateBrand(model) &&
+        return validateBrand(model) &&
                 validateModel(model) &&
                 validateDate(model);
     }
 
     @Override
-    public boolean validateAll(List<Catalog> modelList) {
-        for(Catalog catalog : modelList){
-            if(!validate(catalog)){
-                return false;
-            }
-        }
-        return true;
+    public boolean validateOnUpdate(Catalog model) {
+        return validateId(model) &&
+                validateBrand(model) &&
+                validateModel(model) &&
+                validateDate(model);
     }
 
     private boolean validateId(Catalog model){

@@ -5,7 +5,7 @@ public class Color {
     private String color;
 
     public Color() {
-        this.id = 0L;
+
     }
 
     public Color(Long id, String color) {

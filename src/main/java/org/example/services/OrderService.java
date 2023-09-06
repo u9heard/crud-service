@@ -3,10 +3,7 @@ package org.example.services;
 import org.example.criteria.SearchCriteria;
 import org.example.criteria.SearchOperator;
 import org.example.exceptions.database.service.ModelConflictException;
-import org.example.exceptions.database.service.ModelNotFoundException;
 import org.example.interfaces.CrudRepository;
-import org.example.interfaces.QuerySpecification;
-import org.example.interfaces.StorageService;
 import org.example.models.*;
 
 import java.util.List;
@@ -30,7 +27,9 @@ public class OrderService extends StorageService<Order> {
            checkCarColor(order.getIdCar(), order.getIdColor()) && checkCarVolume(order.getIdCar(), order.getIdVolume())){
             this.modelRepository.save(order);
         }
-        throw new ModelConflictException("Unique check failed");
+        else {
+            throw new ModelConflictException("Unique check failed");
+        }
     }
 
     public void update(Order order){
@@ -38,26 +37,34 @@ public class OrderService extends StorageService<Order> {
                 checkCarColor(order.getIdCar(), order.getIdColor()) && checkCarVolume(order.getIdCar(), order.getIdVolume())){
             this.modelRepository.save(order);
         }
-        throw new ModelConflictException("Unique check failed");
+        else {
+            throw new ModelConflictException("Unique check failed");
+        }
     }
 
     private boolean checkUser(Long id){
-        return !this.userRepository.query(List.of(new SearchCriteria("id", SearchOperator.EQUALS, id))).isEmpty();
+        User searchUser = new User();
+        searchUser.setId(id);
+        return !this.userRepository.query(searchUser).isEmpty();
     }
 
     private boolean checkCatalog(Long id){
-        return !this.catalogRepository.query(List.of(new SearchCriteria("id", SearchOperator.EQUALS, id))).isEmpty();
+        Catalog searchCatalog = new Catalog();
+        searchCatalog.setId(id);
+        return !this.catalogRepository.query(searchCatalog).isEmpty();
     }
 
     private boolean checkCarColor(Long id_car, Long id_color){
-        return !this.carColorRepository.query(List.of(
-                new SearchCriteria("id_car", SearchOperator.EQUALS, id_car),
-                new SearchCriteria("id_color", SearchOperator.EQUALS, id_color))).isEmpty();
+        CarColor searchCarColor = new CarColor();
+        searchCarColor.setIdCar(id_car);
+        searchCarColor.setIdColor(id_color);
+        return !this.carColorRepository.query(searchCarColor).isEmpty();
     }
 
     private boolean checkCarVolume(Long id_car, Long id_volume){
-        return !this.carColorRepository.query(List.of(
-                new SearchCriteria("id_car", SearchOperator.EQUALS, id_car),
-                new SearchCriteria("id_volume", SearchOperator.EQUALS, id_volume))).isEmpty();
+        CarVolume searchCarVolume = new CarVolume();
+        searchCarVolume.setIdCar(id_car);
+        searchCarVolume.setIdVolume(id_volume);
+        return !this.carVolumeRepository.query(searchCarVolume).isEmpty();
     }
 }

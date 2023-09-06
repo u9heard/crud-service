@@ -33,17 +33,17 @@ color VARCHAR(16) UNIQUE NOT NULL
 );
 
 CREATE TABLE car_color(
+id bigserial PRIMARY KEY,
 id_car bigserial NOT NULL,
 id_color bigserial NOT NULL,
-PRIMARY KEY(id_car, id_color),
 FOREIGN KEY (id_car) REFERENCES catalog(id) ON DELETE CASCADE,
 FOREIGN KEY (id_color) REFERENCES color(id) ON DELETE CASCADE
 );
 
 CREATE TABLE car_volume(
+id bigserial PRIMARY KEY,
 id_car bigserial NOT NULL,
 id_volume bigserial NOT NULL,
-PRIMARY KEY(id_car, id_volume),
 FOREIGN KEY (id_car) REFERENCES catalog(id) ON DELETE CASCADE,
 FOREIGN KEY (id_volume) REFERENCES volume(id) ON DELETE CASCADE
 );

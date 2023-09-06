@@ -5,9 +5,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.example.handlers.strategy.OneModelToJson;
 import org.example.interfaces.ModelParser;
 import org.example.interfaces.ModelValidator;
-import org.example.interfaces.StorageService;
+import org.example.services.StorageService;
 import org.example.models.Catalog;
 import org.example.services.CatalogService;
 import org.example.handlers.RequestHandler;
@@ -30,7 +31,7 @@ public class CatalogServlet extends HttpServlet {
         this.catalogModelParser = (ModelParser<Catalog>) getServletContext().getAttribute("catalogParser");
         this.catalogStorageService = (CatalogService) getServletContext().getAttribute("catalogService");
         this.MODEL_NAME = "catalog";
-        this.catalogRequestHandler = new RequestHandler<>(catalogStorageService, catalogModelParser, catalogModelValidator, MODEL_NAME);
+        this.catalogRequestHandler = new RequestHandler<>(catalogStorageService, catalogModelParser, catalogModelValidator, MODEL_NAME, new OneModelToJson<>());
     }
 
     @Override

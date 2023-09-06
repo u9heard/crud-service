@@ -7,18 +7,17 @@ import java.util.List;
 
 public class CarColorValidator implements ModelValidator<CarColor> {
     @Override
-    public boolean validate(CarColor model) {
+    public boolean validateOnInsert(CarColor model) {
         return validateIdCar(model) && validateIdColor(model);
     }
 
     @Override
-    public boolean validateAll(List<CarColor> modelList) {
-        for(CarColor carColor : modelList){
-            if(!validate(carColor))
-                return false;
-        }
+    public boolean validateOnUpdate(CarColor model) {
+        return validateId(model) && validateIdCar(model) && validateIdColor(model);
+    }
 
-        return true;
+    private boolean validateId(CarColor model){
+        return model.getId() != null && model.getId() >= 1;
     }
 
     private boolean validateIdCar(CarColor model){

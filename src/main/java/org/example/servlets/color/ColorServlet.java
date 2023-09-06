@@ -6,15 +6,13 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.handlers.RequestHandler;
+import org.example.handlers.strategy.OneModelToJson;
 import org.example.interfaces.ModelParser;
 import org.example.interfaces.ModelValidator;
-import org.example.interfaces.StorageService;
+import org.example.services.StorageService;
 import org.example.models.Color;
-import org.example.models.User;
 import org.example.services.ColorService;
-import org.example.services.UserService;
 import org.example.validators.ColorValidator;
-import org.example.validators.UserValidator;
 
 import java.io.IOException;
 
@@ -32,7 +30,7 @@ public class ColorServlet extends HttpServlet {
         this.colorModelParser = (ModelParser<Color>) getServletContext().getAttribute("colorParser");
         this.colorStorageService = (ColorService) getServletContext().getAttribute("colorService");
         this.MODEL_NAME = "color";
-        this.requestHandler = new RequestHandler<>(colorStorageService, colorModelParser, colorModelValidator, MODEL_NAME);
+        this.requestHandler = new RequestHandler<>(colorStorageService, colorModelParser, colorModelValidator, MODEL_NAME, new OneModelToJson<>());
     }
 
     @Override

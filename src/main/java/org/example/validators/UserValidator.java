@@ -14,12 +14,11 @@ public class UserValidator implements ModelValidator<User> {
     }
 
     @Override
-    public boolean validate(User user) {
+    public boolean validateOnInsert(User user) {
         if(user == null){
             return false;
         }
-        return validateId(user) &&
-                validateName(user) &&
+        return validateName(user) &&
                 validateSurname(user) &&
                 validateFatherName(user) &&
                 validateDOB(user) &&
@@ -27,13 +26,8 @@ public class UserValidator implements ModelValidator<User> {
     }
 
     @Override
-    public boolean validateAll(List<User> modelList) {
-        for(User user : modelList){
-            if(!validate(user)){
-                return false;
-            }
-        }
-        return true;
+    public boolean validateOnUpdate(User model) {
+        return validateId(model) && validateOnInsert(model);
     }
 
     private boolean validateId(User user){

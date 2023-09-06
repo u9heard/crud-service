@@ -7,9 +7,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.exceptions.MethodNotAllowedException;
 import org.example.handlers.CatalogByBrandRequestHandler;
+import org.example.handlers.strategy.ManyModelsToJson;
 import org.example.interfaces.ModelParser;
 import org.example.interfaces.ModelValidator;
-import org.example.interfaces.StorageService;
+import org.example.services.StorageService;
 import org.example.models.Catalog;
 import org.example.services.CatalogService;
 import org.example.handlers.RequestHandler;
@@ -32,7 +33,7 @@ public class CatalogByBrandServlet extends HttpServlet {
         this.catalogModelParser = (ModelParser<Catalog>) getServletContext().getAttribute("catalogParser");
         this.catalogStorageService = (CatalogService) getServletContext().getAttribute("catalogService");
         this.MODEL_NAME = "catalog";
-        this.catalogRequestHandler = new CatalogByBrandRequestHandler(catalogStorageService, catalogModelParser, catalogModelValidator, MODEL_NAME);
+        this.catalogRequestHandler = new CatalogByBrandRequestHandler(catalogStorageService, catalogModelParser, catalogModelValidator, MODEL_NAME, new ManyModelsToJson<>());
     }
 
     @Override

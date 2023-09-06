@@ -1,8 +1,12 @@
 package org.example.filters;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletResponse;
+import org.example.exceptions.EmptyJsonException;
 import org.example.exceptions.MethodNotAllowedException;
+import org.example.exceptions.ModelNotFullException;
+import org.example.exceptions.parsers.JsonParseException;
 import org.example.exceptions.parsers.ParametersParseException;
 import org.example.exceptions.parsers.PathParseException;
 import org.example.exceptions.database.access.DatabaseDeleteException;
@@ -36,7 +40,7 @@ public class ExceptionsFilter implements Filter {
             filterChain.doFilter(servletRequest, servletResponse);
         } catch (UnsupportedOperationException | ServletException | IOException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        } catch (ParametersParseException | PathParseException | DatabaseServiceException e){
+        } catch (JsonParseException | ModelNotFullException | EmptyJsonException | ParametersParseException | PathParseException | DatabaseServiceException e){
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             writer.write(JsonMessageResponse.getJsonMessage(e.getMessage()));
         } catch (ModelConflictException e){
@@ -50,7 +54,7 @@ public class ExceptionsFilter implements Filter {
             writer.write(JsonMessageResponse.getJsonMessage(e.getMessage()));
         } catch (DatabaseSaveException | DatabaseReadException | DatabaseDeleteException | DatabaseUpdateException e){
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            writer.write(JsonMessageResponse.getJsonMessage("Database error"));
+            writer.write(JsonMessageResponse.getJsonMessage("Internal server error"));
         } finally {
             writer.close();
         }

@@ -6,18 +6,19 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.exceptions.MethodNotAllowedException;
+import org.example.handlers.CarVolumeRequestHandler;
 import org.example.handlers.RequestHandler;
 import org.example.handlers.strategy.ManyModelsToJson;
 import org.example.interfaces.ModelParser;
 import org.example.interfaces.ModelValidator;
-import org.example.services.StorageService;
 import org.example.models.CarVolume;
 import org.example.services.CarVolumeService;
+import org.example.services.StorageService;
 import org.example.validators.CarVolumeValidator;
 
 import java.io.IOException;
 
-public class CarVolumeServlet extends HttpServlet {
+public class CarVolumeByCarIdServlet extends HttpServlet {
     private StorageService<CarVolume> carVolumeStorageService;
     private ModelParser<CarVolume> carVolumeModelParser;
     private ModelValidator<CarVolume> carVolumeModelValidator;
@@ -31,7 +32,7 @@ public class CarVolumeServlet extends HttpServlet {
         this.carVolumeModelParser = (ModelParser<CarVolume>) getServletContext().getAttribute("carvolumeParser");
         this.carVolumeStorageService = (CarVolumeService) getServletContext().getAttribute("carvolumeService");
         this.MODEL_NAME = "volumes";
-        this.carVolumeRequestHandler = new RequestHandler<>(carVolumeStorageService, carVolumeModelParser, carVolumeModelValidator, MODEL_NAME, new ManyModelsToJson<>());
+        this.carVolumeRequestHandler = new CarVolumeRequestHandler(carVolumeStorageService, carVolumeModelParser, carVolumeModelValidator, MODEL_NAME, new ManyModelsToJson<>());
     }
 
     @Override
@@ -41,7 +42,7 @@ public class CarVolumeServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        this.carVolumeRequestHandler.handlePost(req, resp);
+        throw new MethodNotAllowedException(String.format("Method %s not allowed", req.getMethod()));
     }
 
     @Override
@@ -51,6 +52,6 @@ public class CarVolumeServlet extends HttpServlet {
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        this.carVolumeRequestHandler.handleDelete(req, resp);
+        throw new MethodNotAllowedException(String.format("Method %s not allowed", req.getMethod()));
     }
 }

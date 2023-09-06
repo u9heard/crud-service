@@ -14,6 +14,7 @@ import org.example.models.CarColor;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class CarColorSQLRepository implements CrudRepository<CarColor> {
     private DatabaseConnector databaseConnector;
@@ -48,7 +49,7 @@ public class CarColorSQLRepository implements CrudRepository<CarColor> {
     }
 
     @Override
-    public void deleteById(Long id) {
+    public void delete(Long id) {
         String query = "delete from car_color where id = ?";
 
         try(Connection connection = databaseConnector.getConnection();
@@ -62,32 +63,52 @@ public class CarColorSQLRepository implements CrudRepository<CarColor> {
     }
 
     @Override
-    public List<CarColor> getById(Long id) {
-        return query(List.of(new SearchCriteria("id_car", SearchOperator.EQUALS, id)));
+    public CarColor read(Long id) {
+        CarColor searchCarColor = new CarColor();
+        searchCarColor.setId(id);
+        return query(searchCarColor).stream().findFirst().orElse(null);
     }
 
     @Override
-    public List<CarColor> query(List<SearchCriteria> criteriaList) {
+    public List<CarColor> query(CarColor criteriaModel) {
+        StringBuilder query = new StringBuilder("select * from car_color where ");
+        List<Object> parameterList = new ArrayList<>();
 
-        String query = "select * from car_color where " + SpecificationBuilder.build(criteriaList);
+        if(criteriaModel.getId() != null){
+            query.append("id = ? ");
+            parameterList.add(criteriaModel.getId());
+        }
+        if(criteriaModel.getIdCar() != null){
+            if(!parameterList.isEmpty()){
+                query.append(" and ");
+            }
+            query.append("id_car = ? ");
+            parameterList.add(criteriaModel.getIdCar());
+        }
+        if(criteriaModel.getIdColor() != null){
+            if(!parameterList.isEmpty()){
+                query.append(" and ");
+            }
+            query.append("id_color = ?");
+            parameterList.add(criteriaModel.getIdColor());
+        }
 
         try(Connection connection = databaseConnector.getConnection();
-            PreparedStatement statement = connection.prepareStatement(query)) {
+            PreparedStatement statement = connection.prepareStatement(query.toString())) {
 
-            int i = 1;
-            for(SearchCriteria criteria : criteriaList){
-                statement.setObject(i, criteria.getValue());
-                i++;
+            for(int i = 0; i<parameterList.size(); i++){
+                statement.setObject(i+1, parameterList.get(i));
             }
 
             try(ResultSet resultSet = statement.executeQuery()) {
 
                 List<CarColor> resultList = new ArrayList<>();
                 while (resultSet.next()) {
+                    Long id = resultSet.getLong("id");
                     Long id_car = resultSet.getLong("id_car");
                     Long id_color = resultSet.getLong("id_color");
 
-                    resultList.add(new CarColor(id_car, id_color));
+                    resultList.add(new CarColor(id, id_car, id_color));
                 }
                 return resultList;
             }

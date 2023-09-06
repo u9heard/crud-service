@@ -6,12 +6,12 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.handlers.RequestHandler;
+import org.example.handlers.strategy.OneModelToJson;
 import org.example.interfaces.ModelParser;
 import org.example.interfaces.ModelValidator;
-import org.example.interfaces.StorageService;
+import org.example.services.StorageService;
 import org.example.models.Volume;
 import org.example.services.VolumeService;
-import org.example.validators.UserValidator;
 import org.example.validators.VolumeValidator;
 
 import java.io.IOException;
@@ -30,7 +30,7 @@ public class VolumeServlet extends HttpServlet {
         this.volumeModelParser = (ModelParser<Volume>) getServletContext().getAttribute("volumeParser");
         this.volumeStorageService = (VolumeService) getServletContext().getAttribute("volumeService");
         this.MODEL_NAME = "volume";
-        this.requestHandler = new RequestHandler<>(volumeStorageService, volumeModelParser, volumeModelValidator, MODEL_NAME);
+        this.requestHandler = new RequestHandler<>(volumeStorageService, volumeModelParser, volumeModelValidator, MODEL_NAME, new OneModelToJson<>());
     }
 
     @Override

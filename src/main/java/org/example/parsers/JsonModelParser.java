@@ -2,6 +2,9 @@ package org.example.parsers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
+import org.example.exceptions.EmptyJsonException;
+import org.example.exceptions.ModelNotFullException;
 import org.example.exceptions.parsers.JsonParseException;
 import org.example.interfaces.ModelParser;
 
@@ -23,11 +26,13 @@ JsonModelParser<T> implements ModelParser<T> {
             if(!json.isEmpty()){
                 return objectMapper.readValue(json, tClass);
             }
+            else {
+                throw new EmptyJsonException("Json is empty");
+            }
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             throw new JsonParseException(json);
         }
-        return null;
     }
 
     public String toJSON(Object object){

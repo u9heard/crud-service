@@ -15,7 +15,7 @@ public class Catalog {
     private BigDecimal price;
 
     public Catalog(){
-        this.id = 0L;
+
     }
 
     public Catalog(Long id, String brand, String model, LocalDate release_date, BigDecimal price) {

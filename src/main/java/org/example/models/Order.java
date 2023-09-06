@@ -13,7 +13,7 @@ public class Order {
     private LocalDate dateBuy;
 
     public Order() {
-        this.id = 0L;
+
     }
 
     public Order(Long id, Long idUser, Long idCar, Long idVolume, Long idColor, LocalDate dateBuy) {

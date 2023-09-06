@@ -7,9 +7,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.exceptions.MethodNotAllowedException;
 import org.example.handlers.RequestHandler;
+import org.example.handlers.strategy.ManyModelsToJson;
 import org.example.interfaces.ModelParser;
 import org.example.interfaces.ModelValidator;
-import org.example.interfaces.StorageService;
+import org.example.services.StorageService;
 import org.example.models.CarColor;
 import org.example.services.CarColorService;
 import org.example.validators.CarColorValidator;
@@ -31,7 +32,7 @@ public class CarColorServlet extends HttpServlet {
         this.carColorModelParser = (ModelParser<CarColor>) getServletContext().getAttribute("carcolorParser");
         this.carColorStorageService = (CarColorService) getServletContext().getAttribute("carcolorService");
         this.MODEL_NAME = "colors";
-        this.requestHandler = new RequestHandler<>(carColorStorageService, carColorModelParser, carColorModelValidator, MODEL_NAME);
+        this.requestHandler = new RequestHandler<>(carColorStorageService, carColorModelParser, carColorModelValidator, MODEL_NAME, new ManyModelsToJson<>());
     }
 
     @Override
@@ -41,7 +42,7 @@ public class CarColorServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        throw new MethodNotAllowedException(String.format("Method %s not allowed", req.getMethod()));
+        this.requestHandler.handlePost(req, resp);
     }
 
     @Override
@@ -51,6 +52,6 @@ public class CarColorServlet extends HttpServlet {
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        throw new MethodNotAllowedException(String.format("Method %s not allowed", req.getMethod()));
+        this.requestHandler.handleDelete(req, resp);
     }
 }

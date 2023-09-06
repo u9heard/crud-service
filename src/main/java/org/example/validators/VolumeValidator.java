@@ -7,22 +7,16 @@ import java.util.List;
 
 public class VolumeValidator implements ModelValidator<Volume> {
     @Override
-    public boolean validate(Volume model) {
+    public boolean validateOnInsert(Volume model) {
         if(model == null){
             return false;
         }
-        return validateId(model) && validateVolume(model);
+        return validateVolume(model);
     }
 
     @Override
-    public boolean validateAll(List<Volume> modelList) {
-        for (Volume vol : modelList){
-            if(!validate(vol)){
-                return false;
-            }
-        }
-
-        return true;
+    public boolean validateOnUpdate(Volume model) {
+        return validateId(model) && validateOnInsert(model);
     }
 
     private boolean validateId(Volume model){

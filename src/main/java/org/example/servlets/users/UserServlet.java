@@ -5,9 +5,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.example.handlers.strategy.OneModelToJson;
 import org.example.interfaces.ModelParser;
 import org.example.interfaces.ModelValidator;
-import org.example.interfaces.StorageService;
+import org.example.services.StorageService;
 import org.example.models.User;
 import org.example.services.UserService;
 import org.example.handlers.RequestHandler;
@@ -32,7 +33,7 @@ public class UserServlet extends HttpServlet {
         this.userModelParser = (ModelParser<User>) getServletContext().getAttribute("userParser");
         this.userStorageService = (UserService) getServletContext().getAttribute("userService");
         this.MODEL_NAME = "user";
-        this.requestHandler = new RequestHandler<>(userStorageService, userModelParser, userModelValidator, MODEL_NAME);
+        this.requestHandler = new RequestHandler<>(userStorageService, userModelParser, userModelValidator, MODEL_NAME, new OneModelToJson<>());
     }
 
     @Override

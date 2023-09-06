@@ -15,6 +15,7 @@ import org.example.models.Color;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ColorSQLRepository implements CrudRepository<Color> {
 
@@ -64,7 +65,7 @@ public class ColorSQLRepository implements CrudRepository<Color> {
     }
 
     @Override
-    public void deleteById(Long id) {
+    public void delete(Long id) {
         String query = "delete from color where id = ?";
 
         try(Connection connection = databaseConnector.getConnection();
@@ -78,21 +79,34 @@ public class ColorSQLRepository implements CrudRepository<Color> {
     }
 
     @Override
-    public List<Color> getById(Long id) {
-        return query(List.of(new SearchCriteria("id", SearchOperator.EQUALS, id)));
+    public Color read(Long id) {
+        Color searchColor = new Color();
+        searchColor.setId(id);
+        return query(searchColor).stream().findFirst().orElse(null);
     }
 
     @Override
-    public List<Color> query(List<SearchCriteria> criteriaList) {
-        String query = "select * from color where " + SpecificationBuilder.build(criteriaList);
+    public List<Color> query(Color criteriaModel) {
+        StringBuilder query = new StringBuilder("select * from color where ");
+        List<Object> parameterList = new ArrayList<>();
+
+        if(criteriaModel.getId() != null){
+            query.append("id = ? ");
+            parameterList.add(criteriaModel.getId());
+        }
+        if(criteriaModel.getColor() != null){
+            if(!parameterList.isEmpty()){
+                query.append(" and ");
+            }
+            query.append("color = ?");
+            parameterList.add(criteriaModel.getColor());
+        }
 
         try(Connection connection = databaseConnector.getConnection();
-            PreparedStatement statement = connection.prepareStatement(query)) {
+            PreparedStatement statement = connection.prepareStatement(query.toString())) {
 
-            int i = 1;
-            for(SearchCriteria criteria : criteriaList){
-                statement.setObject(i, criteria.getValue());
-                i++;
+            for(int i=0; i<parameterList.size(); i++){
+                statement.setObject(i+1, parameterList.get(i));
             }
 
             try(ResultSet resultSet = statement.executeQuery()) {

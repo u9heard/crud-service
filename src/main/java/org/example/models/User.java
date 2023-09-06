@@ -13,7 +13,7 @@ public class User {
     private String sex;
 
     public User(){
-        this.id = 0L;
+
     }
     public User(Long id, String name, String surname, String father_name, LocalDate DOB, String sex) {
         this.id = id;

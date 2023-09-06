@@ -6,15 +6,13 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.handlers.RequestHandler;
+import org.example.handlers.strategy.OneModelToJson;
 import org.example.interfaces.ModelParser;
 import org.example.interfaces.ModelValidator;
-import org.example.interfaces.StorageService;
+import org.example.services.StorageService;
 import org.example.models.Order;
-import org.example.models.User;
 import org.example.services.OrderService;
-import org.example.services.UserService;
 import org.example.validators.OrderValidator;
-import org.example.validators.UserValidator;
 
 import java.io.IOException;
 
@@ -33,7 +31,7 @@ public class OrderServlet extends HttpServlet {
         this.orderModelParser = (ModelParser<Order>) getServletContext().getAttribute("orderParser");
         this.orderStorageService = (OrderService) getServletContext().getAttribute("orderService");
         this.MODEL_NAME = "user";
-        this.requestHandler = new RequestHandler<>(orderStorageService, orderModelParser, orderModelValidator, MODEL_NAME);
+        this.requestHandler = new RequestHandler<>(orderStorageService, orderModelParser, orderModelValidator, MODEL_NAME, new OneModelToJson<>());
     }
 
     @Override

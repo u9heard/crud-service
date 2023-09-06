@@ -12,11 +12,13 @@ import org.example.interfaces.CrudRepository;
 import org.example.interfaces.QuerySpecification;
 import org.example.models.Catalog;
 
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class CatalogSQLRepository implements CrudRepository<Catalog> {
     private final DatabaseConnector databaseConnector;
@@ -73,7 +75,7 @@ public class CatalogSQLRepository implements CrudRepository<Catalog> {
         }
     }
 
-    public void deleteById(Long id){
+    public void delete(Long id){
         String query = "delete from catalog where id = ?";
 
         try(Connection connection = databaseConnector.getConnection();
@@ -87,22 +89,58 @@ public class CatalogSQLRepository implements CrudRepository<Catalog> {
     }
 
     @Override
-    public List<Catalog> getById(Long id) {
-        return query(List.of(new SearchCriteria("id", SearchOperator.EQUALS, id)));
+    public Catalog read(Long id) {
+        Catalog searchCatalog = new Catalog();
+        searchCatalog.setId(id);
+        return query(searchCatalog).stream().findFirst().orElse(null);
     }
 
     @Override
-    public List<Catalog> query(List<SearchCriteria> criteriaList) {
-        String query = "select * from catalog where " + SpecificationBuilder.build(criteriaList);
+    public List<Catalog> query(Catalog criteriaModel) {
+        StringBuilder query = new StringBuilder("select * from catalog where ");
+        List<Object> parameterList = new ArrayList<>();
+
+        if(criteriaModel.getId() != null){
+            query.append("id = ? ");
+            parameterList.add(criteriaModel.getId());
+        }
+        if(criteriaModel.getBrand() != null){
+            if(!parameterList.isEmpty()){
+                query.append(" and ");
+            }
+            query.append("brand = ? ");
+            parameterList.add(criteriaModel.getBrand());
+        }
+        if(criteriaModel.getModel() != null){
+            if(!parameterList.isEmpty()){
+                query.append(" and ");
+            }
+            query.append("model = ? ");
+            parameterList.add(criteriaModel.getModel());
+        }
+        if(criteriaModel.getRelease_date() != null){
+            if(!parameterList.isEmpty()){
+                query.append(" and ");
+            }
+            query.append("release_date = ? ");
+            parameterList.add(criteriaModel.getRelease_date());
+        }
+        if(criteriaModel.getPrice() != null ){
+            if(!parameterList.isEmpty()){
+                query.append(" and ");
+            }
+            query.append("price = ?");
+            parameterList.add(criteriaModel.getPrice());
+        }
 
         try(Connection connection = databaseConnector.getConnection();
-            PreparedStatement statement = connection.prepareStatement(query)) {
+            PreparedStatement statement = connection.prepareStatement(query.toString())) {
 
-            int i = 1;
-            for(SearchCriteria criteria : criteriaList){
-                statement.setObject(i, criteria.getValue());
-                i++;
+            for(int i=0; i<parameterList.size(); i++){
+                statement.setObject(i+1, parameterList.get(i));
             }
+
+            System.out.println(statement.toString());
 
             try(ResultSet resultSet = statement.executeQuery()) {
                 List<Catalog> resultList = new ArrayList<>();
