@@ -27,11 +27,4 @@ public abstract class StorageService<T> {
         }
         return resultModel;
     }
-    public List<T> query(T criteriaModel){
-        List<T> resultList = this.modelRepository.query(criteriaModel);
-        if(resultList.isEmpty()){
-            throw new ModelNotFoundException("Model not found");
-        }
-        return resultList;
-    }
 }
