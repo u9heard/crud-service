@@ -14,21 +14,14 @@ public class CatalogService extends StorageService<Catalog> {
     }
 
     public void add(Catalog catalog){
-        if(checkUniqueOnInsert(catalog.getBrand(), catalog.getModel())){
-            this.modelRepository.save(catalog);
-        }
-        else {
-            throw new ModelConflictException("Unique check failed");
-        }
+        checkUniqueOnInsert(catalog.getBrand(), catalog.getModel());
+        this.modelRepository.save(catalog);
     }
 
     public void update(Catalog catalog){
-        if(checkUniqueOnUpdate(catalog.getId(), catalog.getBrand(), catalog.getModel())){
-            this.modelRepository.update(catalog);
-        }
-        else {
-            throw new ModelConflictException("Unique check failed");
-        }
+        checkUniqueOnUpdate(catalog.getId(), catalog.getBrand(), catalog.getModel());
+        this.modelRepository.update(catalog);
+
     }
 
     public List<Catalog> getByBrand(String brand){
@@ -41,21 +34,22 @@ public class CatalogService extends StorageService<Catalog> {
         return result;
     }
 
-    private boolean checkUniqueOnInsert(String brand, String model){
+    private void checkUniqueOnInsert(String brand, String model){
         Catalog searchCatalog = new Catalog();
         searchCatalog.setBrand(brand);
         searchCatalog.setModel(model);
-        return this.modelRepository.query(searchCatalog).isEmpty();
+        if (!this.modelRepository.query(searchCatalog).isEmpty()){
+            throw new ModelConflictException("Car already exists");
+        }
     }
 
-    private boolean checkUniqueOnUpdate(Long id, String brand, String model){
+    private void checkUniqueOnUpdate(Long id, String brand, String model){
         Catalog searchCatalog = new Catalog();
         searchCatalog.setId(id);
         searchCatalog.setBrand(brand);
         searchCatalog.setModel(model);
-        if(this.modelRepository.query(searchCatalog).isEmpty()) {
-            return checkUniqueOnInsert(brand, model);
+        if (!this.modelRepository.query(searchCatalog).isEmpty()){
+            throw new ModelConflictException("Car already exists");
         }
-        return true;
     }
 }

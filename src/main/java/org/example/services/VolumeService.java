@@ -13,24 +13,18 @@ public class VolumeService extends StorageService<Volume> {
     }
 
     public void add(Volume volume){
-        if(checkVolume(volume)) {
-            this.modelRepository.save(volume);
-        }
-        else {
-            throw new ModelConflictException("Unique check failed");
-        }
+        checkVolume(volume);
+        this.modelRepository.save(volume);
     }
 
     public void update(Volume volume){
-        if(checkVolume(volume)) {
-            this.modelRepository.update(volume);
-        }
-        else {
-            throw new ModelConflictException("Unique check failed");
-        }
+        checkVolume(volume);
+        this.modelRepository.update(volume);
     }
 
-    private boolean checkVolume(Volume volume){
-        return this.modelRepository.query(volume).isEmpty();
+    private void checkVolume(Volume volume){
+        if(!this.modelRepository.query(volume).isEmpty()){
+            throw new ModelConflictException("Volume already exists");
+        }
     }
 }

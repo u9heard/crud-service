@@ -1,6 +1,7 @@
 package org.example.services;
 
 import org.example.exceptions.database.service.ModelConflictException;
+import org.example.exceptions.database.service.ModelNotFoundException;
 import org.example.interfaces.CrudRepository;
 import org.example.models.*;
 
@@ -21,48 +22,52 @@ public class OrderService extends StorageService<Order> {
     }
 
     public void add(Order order){
-        if(checkUser(order.getIdUser()) && checkCatalog(order.getIdCar()) &&
-           checkCarColor(order.getIdCar(), order.getIdColor()) && checkCarVolume(order.getIdCar(), order.getIdVolume())){
-            this.modelRepository.save(order);
-        }
-        else {
-            throw new ModelConflictException("Unique check failed");
-        }
+        checkUser(order.getIdUser());
+        checkCatalog(order.getIdCar());
+        checkCarColor(order.getIdCar(), order.getIdColor());
+        checkCarVolume(order.getIdCar(), order.getIdVolume());
+        this.modelRepository.save(order);
     }
 
     public void update(Order order){
-        if(checkUser(order.getIdUser()) && checkCatalog(order.getIdCar()) &&
-                checkCarColor(order.getIdCar(), order.getIdColor()) && checkCarVolume(order.getIdCar(), order.getIdVolume())){
-            this.modelRepository.save(order);
-        }
-        else {
-            throw new ModelConflictException("Unique check failed");
-        }
+        checkUser(order.getIdUser());
+        checkCatalog(order.getIdCar());
+        checkCarColor(order.getIdCar(), order.getIdColor());
+        checkCarVolume(order.getIdCar(), order.getIdVolume());
+        this.modelRepository.update(order);
     }
 
-    private boolean checkUser(Long id){
+    private void checkUser(Long id){
         User searchUser = new User();
         searchUser.setId(id);
-        return !this.userRepository.query(searchUser).isEmpty();
+        if(this.userRepository.query(searchUser).isEmpty()){
+            throw new ModelNotFoundException("User not found");
+        }
     }
 
-    private boolean checkCatalog(Long id){
+    private void checkCatalog(Long id){
         Catalog searchCatalog = new Catalog();
         searchCatalog.setId(id);
-        return !this.catalogRepository.query(searchCatalog).isEmpty();
+        if(this.catalogRepository.query(searchCatalog).isEmpty()){
+            throw new ModelNotFoundException("Car not found");
+        }
     }
 
-    private boolean checkCarColor(Long id_car, Long id_color){
+    private void checkCarColor(Long id_car, Long id_color){
         CarColor searchCarColor = new CarColor();
         searchCarColor.setIdCar(id_car);
         searchCarColor.setIdColor(id_color);
-        return !this.carColorRepository.query(searchCarColor).isEmpty();
+        if(this.carColorRepository.query(searchCarColor).isEmpty()){
+            throw new ModelNotFoundException("There is no such color for this car");
+        }
     }
 
-    private boolean checkCarVolume(Long id_car, Long id_volume){
+    private void checkCarVolume(Long id_car, Long id_volume){
         CarVolume searchCarVolume = new CarVolume();
         searchCarVolume.setIdCar(id_car);
         searchCarVolume.setIdVolume(id_volume);
-        return !this.carVolumeRepository.query(searchCarVolume).isEmpty();
+        if(this.carVolumeRepository.query(searchCarVolume).isEmpty()){
+            throw new ModelNotFoundException("There is no such volume for this car");
+        }
     }
 }

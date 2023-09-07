@@ -18,7 +18,7 @@ public class ColorService extends StorageService<Color> {
             this.modelRepository.save(color);
         }
         else {
-            throw new ModelConflictException("Color already exist");
+            throw new ModelConflictException("Color already exists");
         }
     }
 
@@ -27,7 +27,7 @@ public class ColorService extends StorageService<Color> {
             this.modelRepository.update(color);
         }
         else {
-            throw new ModelConflictException("Color already exist");
+            throw new ModelConflictException("Color already exists");
         }
     }
 

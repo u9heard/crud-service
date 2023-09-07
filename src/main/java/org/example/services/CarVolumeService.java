@@ -21,21 +21,16 @@ public class CarVolumeService extends StorageService<CarVolume> {
     }
 
     public void add(CarVolume carVolume){
-        if(checkVolume(carVolume.getIdVolume()) && checkCatalog(carVolume.getIdCar())){
-            this.modelRepository.save(carVolume);
-        }
-        else {
-            throw new ModelConflictException("Unique check failed");
-        }
+        checkVolume(carVolume.getIdVolume());
+        checkCatalog(carVolume.getIdCar());
+        this.modelRepository.save(carVolume);
+
     }
 
     public void update(CarVolume carVolume){
-        if(checkVolume(carVolume.getIdVolume()) && checkCatalog(carVolume.getIdCar())){
-            this.modelRepository.update(carVolume);
-        }
-        else {
-            throw new ModelConflictException("Unique check failed");
-        }
+        checkVolume(carVolume.getIdVolume());
+        checkCatalog(carVolume.getIdCar());
+        this.modelRepository.update(carVolume);
     }
 
     public List<CarVolume> getByCarId(Long id){
@@ -59,15 +54,19 @@ public class CarVolumeService extends StorageService<CarVolume> {
         deleteById(resiltList.stream().findFirst().get().getId());
     }
 
-    private boolean checkCatalog(Long id){
+    private void checkCatalog(Long id){
         Catalog searchCatalog = new Catalog();
         searchCatalog.setId(id);
-        return !this.catalogRepository.query(searchCatalog).isEmpty();
+        if(this.catalogRepository.query(searchCatalog).isEmpty()){
+            throw new ModelNotFoundException("Car not found");
+        }
     }
 
-    private boolean checkVolume(Long id){
+    private void checkVolume(Long id){
         Volume searchVolume = new Volume();
         searchVolume.setId(id);
-        return !this.volumeRepository.query(searchVolume).isEmpty();
+        if(this.volumeRepository.query(searchVolume).isEmpty()){
+            throw new ModelNotFoundException("Volume not found");
+        }
     }
 }

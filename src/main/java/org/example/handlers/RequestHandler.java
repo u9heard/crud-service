@@ -65,6 +65,7 @@ public class RequestHandler<T> {
     public void handleDelete(HttpServletRequest req, HttpServletResponse resp){
         resp.setContentType("application/json");
         deleteModelByRequest(req);
+        resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
     }
 
     protected void deleteModelByRequest(HttpServletRequest req){

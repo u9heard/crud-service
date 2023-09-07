@@ -37,14 +37,16 @@
 
 <p>CARCOLOR</p>
 <ul>
-<li>curl -i -X GET "http://localhost:8080/crudservice/carcolor/3" // colors for car by car_id</li>
+<li>curl -i -X GET "http://localhost:8080/crudservice/carcolor/3" // car_color by id</li>
+<li>curl -i -X GET "http://localhost:8080/crudservice/carcolor/car/3" // colors for car by car_id</li>
 <li>curl -i -X POST -H "Content-Type: application/json" -d "{\"idCar\":\"5\",\"idColor\": \"1\"}" http://localhost:8080/crudservice/carcolor</li>
 <li>curl -i -X DELETE "http://localhost:8080/crudservice/carcolor?idCar=3&idColor=1"</li>
 </ul>
 
 <p>CARVOLUME</p>
 <ul>
-<li>curl -i -X GET "http://localhost:8080/crudservice/carvolume/3" // volumes for car by car_id</li>
+<li>curl -i -X GET "http://localhost:8080/crudservice/carvolume/3" // volume by id</li>
+<li>curl -i -X GET "http://localhost:8080/crudservice/carvolume/car/3" // volumes for car by car_id</li>
 <li>curl -i -X POST -H "Content-Type: application/json" -d "{\"idCar\":\"3\",\"idVolume\": \"1\"}" http://localhost:8080/crudservice/carvolume</li>
 <li>curl -i -X DELETE "http://localhost:8080/crudservice/carvolume?idCar=3&idVolume=1"</li>
 </ul>

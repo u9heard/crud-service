@@ -20,21 +20,15 @@ public class CarColorService extends StorageService<CarColor> {
     }
 
     public void add(CarColor carColor){
-        if(checkCatalog(carColor.getIdCar()) && checkColor(carColor.getIdColor())){
-            this.modelRepository.save(carColor);
-        }
-        else {
-            throw new ModelConflictException("Unique check failed");
-        }
+        checkCatalog(carColor.getIdCar());
+        checkColor(carColor.getIdColor());
+        this.modelRepository.save(carColor);
     }
 
     public void update(CarColor carColor){
-        if(checkCatalog(carColor.getIdCar()) && checkColor(carColor.getIdColor())){
-            this.modelRepository.update(carColor);
-        }
-        else {
-            throw new ModelConflictException("Unique check failed");
-        }
+        checkCatalog(carColor.getIdCar());
+        checkColor(carColor.getIdColor());
+        this.modelRepository.update(carColor);
     }
 
     public List<CarColor> getByCarId(Long id){
@@ -58,15 +52,19 @@ public class CarColorService extends StorageService<CarColor> {
         deleteById(resiltList.stream().findFirst().get().getId());
     }
 
-    private boolean checkCatalog(Long id){
+    private void checkCatalog(Long id){
         Catalog searchCatalog = new Catalog();
         searchCatalog.setId(id);
-        return !this.catalogRepository.query(searchCatalog).isEmpty();
+        if(this.catalogRepository.query(searchCatalog).isEmpty()){
+            throw new ModelNotFoundException("Car not found");
+        }
     }
 
-    private boolean checkColor(Long id){
+    private void checkColor(Long id){
         Color searchColor = new Color();
         searchColor.setId(id);
-        return !this.colorRepository.query(searchColor).isEmpty();
+        if(this.colorRepository.query(searchColor).isEmpty()){
+            throw new ModelNotFoundException("Color not found");
+        }
     }
 }
