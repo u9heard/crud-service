@@ -29,8 +29,8 @@ public class ColorServlet extends HttpServlet {
         this.colorModelValidator = (ColorValidator) getServletContext().getAttribute("colorValidator");
         this.colorModelParser = (ModelParser<Color>) getServletContext().getAttribute("colorParser");
         this.colorStorageService = (ColorService) getServletContext().getAttribute("colorService");
-        this.MODEL_NAME = "color";
-        this.requestHandler = new RequestHandler<>(colorStorageService, colorModelParser, colorModelValidator, MODEL_NAME, new OneModelToJson<>());
+        this.MODEL_NAME = "colors";
+        this.requestHandler = new RequestHandler<>(colorStorageService, colorModelParser, colorModelValidator, MODEL_NAME);
     }
 
     @Override

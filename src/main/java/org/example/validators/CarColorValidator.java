@@ -1,5 +1,6 @@
 package org.example.validators;
 
+import org.example.exceptions.ModelValidationException;
 import org.example.interfaces.ModelValidator;
 import org.example.models.CarColor;
 
@@ -7,24 +8,35 @@ import java.util.List;
 
 public class CarColorValidator implements ModelValidator<CarColor> {
     @Override
-    public boolean validateOnInsert(CarColor model) {
-        return validateIdCar(model) && validateIdColor(model);
+    public void validateOnInsert(CarColor model) {
+        validateNull(model);
+        validateIdCar(model);
+        validateIdColor(model);
     }
 
     @Override
-    public boolean validateOnUpdate(CarColor model) {
-        return validateId(model) && validateIdCar(model) && validateIdColor(model);
+    public void validateOnUpdate(CarColor model) {
+        validateNull(model);
+        validateId(model);
+        validateIdCar(model);
+        validateIdColor(model);
     }
 
-    private boolean validateId(CarColor model){
-        return model.getId() != null && model.getId() >= 1;
+    private void validateId(CarColor model){
+        if(model.getId() == null){
+            throw new ModelValidationException("Invalid CarColor id");
+        }
     }
 
-    private boolean validateIdCar(CarColor model){
-        return model.getIdCar() != null && model.getIdCar() >=1;
+    private void validateIdCar(CarColor model){
+        if(model.getIdCar() == null){
+            throw new ModelValidationException("Invalid CarColor car id");
+        }
     }
 
-    private boolean validateIdColor(CarColor model){
-        return model.getIdColor() != null && model.getIdColor() >=1;
+    private void validateIdColor(CarColor model){
+        if(model.getIdColor() == null){
+            throw new ModelValidationException("Invalid CarColor color id");
+        }
     }
 }

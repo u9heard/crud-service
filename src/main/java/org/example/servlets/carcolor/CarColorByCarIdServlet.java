@@ -6,7 +6,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.exceptions.MethodNotAllowedException;
-import org.example.handlers.CarColorRequestHandler;
+import org.example.handlers.CarColorByCarRequestHandler;
 import org.example.handlers.RequestHandler;
 import org.example.handlers.strategy.ManyModelsToJson;
 import org.example.interfaces.ModelParser;
@@ -33,7 +33,7 @@ public class CarColorByCarIdServlet extends HttpServlet {
         this.carColorModelParser = (ModelParser<CarColor>) getServletContext().getAttribute("carcolorParser");
         this.carColorStorageService = (CarColorService) getServletContext().getAttribute("carcolorService");
         this.MODEL_NAME = "colors";
-        this.requestHandler = new CarColorRequestHandler(carColorStorageService, carColorModelParser, carColorModelValidator, MODEL_NAME, new ManyModelsToJson<>());
+        this.requestHandler = new CarColorByCarRequestHandler(carColorStorageService, carColorModelParser, carColorModelValidator, MODEL_NAME);
     }
 
     @Override

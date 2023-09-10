@@ -25,7 +25,9 @@ public class VolumeService extends StorageService<Volume> {
     }
 
     private void checkVolume(Volume volume){
-        if(!this.modelRepository.query(volume).isEmpty()){
+        Volume searchVolume = new Volume();
+        searchVolume.setVolume(volume.getVolume());
+        if(!this.modelRepository.query(searchVolume).isEmpty()){
             throw new ModelConflictException("Volume already exists");
         }
     }

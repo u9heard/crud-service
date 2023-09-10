@@ -12,8 +12,8 @@ import org.example.parsers.StringPathParser;
 import java.util.List;
 
 public class CatalogByBrandRequestHandler extends RequestHandler<Catalog> {
-    public CatalogByBrandRequestHandler(StorageService<Catalog> storageService, ModelParser<Catalog> modelParser, ModelValidator<Catalog> modelValidator, String MODEL_NAME, ConvertModelStrategy<Catalog> convertModelStrategy) {
-        super(storageService, modelParser, modelValidator, MODEL_NAME, convertModelStrategy);
+    public CatalogByBrandRequestHandler(StorageService<Catalog> storageService, ModelParser<Catalog> modelParser, ModelValidator<Catalog> modelValidator, String MODEL_NAME) {
+        super(storageService, modelParser, modelValidator, MODEL_NAME);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package org.example.validators;
 
+import org.example.exceptions.ModelValidationException;
 import org.example.interfaces.ModelValidator;
 import org.example.models.Color;
 
@@ -7,20 +8,27 @@ import java.util.List;
 
 public class ColorValidator implements ModelValidator<Color> {
     @Override
-    public boolean validateOnInsert(Color model) {
-        return validateId(model) && validateColor(model);
+    public void validateOnInsert(Color model) {
+        validateNull(model);
+        validateColor(model);
     }
 
     @Override
-    public boolean validateOnUpdate(Color model) {
-        return validateColor(model);
+    public void validateOnUpdate(Color model) {
+        validateNull(model);
+        validateId(model);
+        validateColor(model);
     }
 
-    private boolean validateId(Color model){
-        return model.getId() != null && model.getId() >=0;
+    private void validateId(Color model){
+        if(model.getId() == null){
+            throw new ModelValidationException("Invalid color id");
+        }
     }
 
-    private boolean validateColor(Color model){
-        return model.getColor() != null && !model.getColor().isEmpty();
+    private void validateColor(Color model){
+        if(model.getColor() == null){
+            throw new ModelValidationException("Invalid color name");
+        }
     }
 }

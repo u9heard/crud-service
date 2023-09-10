@@ -1,5 +1,6 @@
 package org.example.validators;
 
+import org.example.exceptions.ModelValidationException;
 import org.example.interfaces.ModelValidator;
 import org.example.models.Catalog;
 
@@ -11,36 +12,43 @@ public class CatalogValidator implements ModelValidator<Catalog> {
 
     }
     @Override
-    public boolean validateOnInsert(Catalog model) {
-        if(model == null){
-            return false;
-        }
-        return validateBrand(model) &&
-                validateModel(model) &&
-                validateDate(model);
+    public void validateOnInsert(Catalog model) {
+        validateNull(model);
+        validateBrand(model);
+        validateModel(model);
+        validateDate(model);
     }
 
     @Override
-    public boolean validateOnUpdate(Catalog model) {
-        return validateId(model) &&
-                validateBrand(model) &&
-                validateModel(model) &&
-                validateDate(model);
+    public void validateOnUpdate(Catalog model) {
+        validateNull(model);
+        validateId(model);
+        validateBrand(model);
+        validateModel(model);
+        validateDate(model);
     }
 
-    private boolean validateId(Catalog model){
-        return model.getId() != null && model.getId() >= 0;
+    private void validateId(Catalog model){
+        if(model.getId() == null){
+            throw new ModelValidationException("Invalid catalog id");
+        }
     }
 
-    private boolean validateBrand(Catalog model){
-        return model.getBrand() != null && !model.getBrand().isEmpty();
+    private void validateBrand(Catalog model){
+        if(model.getBrand() == null){
+            throw new ModelValidationException("Invalid catalog brand name");
+        }
     }
 
-    private boolean validateModel(Catalog model){
-        return model.getModel() != null && !model.getModel().isEmpty();
+    private void validateModel(Catalog model){
+        if(model.getModel() == null){
+            throw new ModelValidationException("Invalid catalog model name");
+        }
     }
 
-    private boolean validateDate(Catalog model){
-        return model.getRelease_date() != null;
+    private void validateDate(Catalog model){
+        if(model.getRelease_date() == null){
+            throw new ModelValidationException("Invalid catalog release date value");
+        }
     }
 }

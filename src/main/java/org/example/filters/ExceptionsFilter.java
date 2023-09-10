@@ -2,7 +2,8 @@ package org.example.filters;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletResponse;
-import org.example.exceptions.EmptyJsonException;
+import org.example.exceptions.ModelValidationException;
+import org.example.exceptions.parsers.EmptyJsonException;
 import org.example.exceptions.MethodNotAllowedException;
 import org.example.exceptions.ModelNotFullException;
 import org.example.exceptions.ResponseWriterException;
@@ -38,7 +39,7 @@ public class ExceptionsFilter implements Filter {
             filterChain.doFilter(servletRequest, servletResponse);
         } catch (ResponseWriterException | ServletException | IOException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        } catch (JsonParseException | ModelNotFullException | EmptyJsonException | ParametersParseException | PathParseException e){
+        } catch (ModelValidationException | JsonParseException | ModelNotFullException | EmptyJsonException | ParametersParseException | PathParseException e){
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             writer.write(JsonMessageResponse.getJsonMessage(e.getMessage()));
         } catch (ModelConflictException e){
@@ -54,7 +55,11 @@ public class ExceptionsFilter implements Filter {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             System.out.println(e.getMessage());
             writer.write(JsonMessageResponse.getJsonMessage("Internal server error"));
-        } finally {
+        } catch (Exception e){
+            e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
+        finally {
             writer.close();
         }
     }

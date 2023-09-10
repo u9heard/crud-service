@@ -1,5 +1,6 @@
 package org.example.validators;
 
+import org.example.exceptions.ModelValidationException;
 import org.example.interfaces.ModelValidator;
 import org.example.models.Order;
 
@@ -7,40 +8,55 @@ import java.util.List;
 
 public class OrderValidator implements ModelValidator<Order> {
     @Override
-    public boolean validateOnInsert(Order model) {
-        return validateIdUser(model) &&
-                validateIdCatalog(model) &&
-                validateIdColor(model) &&
-                validateIdVolume(model) &&
-                validateDate(model);
+    public void validateOnInsert(Order model) {
+        validateNull(model);
+        validateIdUser(model);
+        validateIdCatalog(model);
+        validateIdColor(model);
+        validateIdVolume(model);
+        validateDate(model);
     }
 
     @Override
-    public boolean validateOnUpdate(Order model) {
-        return validateId(model) && validateOnInsert(model);
+    public void validateOnUpdate(Order model) {
+        validateNull(model);
+        validateId(model);
+        validateOnInsert(model);
     }
 
-    private boolean validateId(Order model){
-        return model.getId() != null && model.getId() >= 0;
+    private void validateId(Order model){
+        if(model.getId() == null){
+            throw new ModelValidationException("Invalid order id");
+        }
     }
 
-    private boolean validateIdUser(Order model){
-        return model.getIdUser() != null && model.getIdUser() >= 1;
+    private void validateIdUser(Order model){
+        if(model.getIdUser() == null){
+            throw new ModelValidationException("Invalid order user id");
+        }
     }
 
-    private boolean validateIdCatalog(Order model){
-        return model.getIdCar() != null && model.getIdCar() >= 1;
+    private void validateIdCatalog(Order model){
+        if(model.getIdCar() == null){
+            throw new ModelValidationException("Invalid order catalog id");
+        }
     }
 
-    private boolean validateIdColor(Order model){
-        return model.getIdColor() != null && model.getIdColor() >= 1;
+    private void validateIdColor(Order model){
+        if(model.getIdColor() == null){
+            throw new ModelValidationException("Invalid order color id");
+        }
     }
 
-    private boolean validateIdVolume(Order model){
-        return model.getIdVolume() != null && model.getIdVolume() >= 1;
+    private void validateIdVolume(Order model){
+        if(model.getIdVolume() == null){
+            throw new ModelValidationException("Invalid order volume id");
+        }
     }
 
-    private boolean validateDate(Order model){
-        return model.getDateBuy() != null;
+    private void validateDate(Order model){
+        if(model.getDateBuy() == null){
+            throw new ModelValidationException("Invalid order date value");
+        }
     }
 }

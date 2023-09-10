@@ -1,5 +1,6 @@
 package org.example.validators;
 
+import org.example.exceptions.ModelValidationException;
 import org.example.interfaces.ModelValidator;
 import org.example.models.CarColor;
 import org.example.models.CarVolume;
@@ -8,24 +9,35 @@ import java.util.List;
 
 public class CarVolumeValidator implements ModelValidator<CarVolume> {
     @Override
-    public boolean validateOnInsert(CarVolume model) {
-        return validateIdCar(model) && validateIdVolume(model);
+    public void validateOnInsert(CarVolume model) {
+        validateNull(model);
+        validateIdCar(model);
+        validateIdVolume(model);
     }
 
     @Override
-    public boolean validateOnUpdate(CarVolume model) {
-        return validateIdCar(model) && validateIdVolume(model) && validateId(model);
+    public void validateOnUpdate(CarVolume model) {
+        validateNull(model);
+        validateIdCar(model);
+        validateIdVolume(model);
+        validateId(model);
     }
 
-    private boolean validateId(CarVolume model){
-        return model.getId() != null && model.getId() >=1;
+    private void validateId(CarVolume model){
+        if(model.getId() == null){
+            throw new ModelValidationException("Invalid CarVolume id");
+        }
     }
 
-    private boolean validateIdCar(CarVolume model){
-        return model.getIdCar() != null && model.getIdCar() >=1;
+    private void validateIdCar(CarVolume model){
+        if(model.getIdCar() == null){
+            throw new ModelValidationException("Invalid CarColor car id");
+        }
     }
 
-    private boolean validateIdVolume(CarVolume model){
-        return model.getIdVolume() != null && model.getIdVolume() >=1;
+    private void validateIdVolume(CarVolume model){
+        if(model.getIdVolume() == null){
+            throw new ModelValidationException("Invalid CarColor volume id");
+        }
     }
 }

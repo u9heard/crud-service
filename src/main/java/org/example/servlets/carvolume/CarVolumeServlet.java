@@ -31,7 +31,7 @@ public class CarVolumeServlet extends HttpServlet {
         this.carVolumeModelParser = (ModelParser<CarVolume>) getServletContext().getAttribute("carvolumeParser");
         this.carVolumeStorageService = (CarVolumeService) getServletContext().getAttribute("carvolumeService");
         this.MODEL_NAME = "volumes";
-        this.carVolumeRequestHandler = new RequestHandler<>(carVolumeStorageService, carVolumeModelParser, carVolumeModelValidator, MODEL_NAME, new ManyModelsToJson<>());
+        this.carVolumeRequestHandler = new RequestHandler<>(carVolumeStorageService, carVolumeModelParser, carVolumeModelValidator, MODEL_NAME);
     }
 
     @Override

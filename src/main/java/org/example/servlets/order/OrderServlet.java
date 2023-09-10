@@ -30,8 +30,8 @@ public class OrderServlet extends HttpServlet {
         this.orderModelValidator = (OrderValidator) getServletContext().getAttribute("orderValidator");
         this.orderModelParser = (ModelParser<Order>) getServletContext().getAttribute("orderParser");
         this.orderStorageService = (OrderService) getServletContext().getAttribute("orderService");
-        this.MODEL_NAME = "user";
-        this.requestHandler = new RequestHandler<>(orderStorageService, orderModelParser, orderModelValidator, MODEL_NAME, new OneModelToJson<>());
+        this.MODEL_NAME = "orders";
+        this.requestHandler = new RequestHandler<>(orderStorageService, orderModelParser, orderModelValidator, MODEL_NAME);
     }
 
     @Override

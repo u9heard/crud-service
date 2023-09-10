@@ -106,47 +106,50 @@ public class UserSQLRepository implements CrudRepository<User> {
 
     @Override
     public List<User> query(User criteriaModel) {
-        StringBuilder query = new StringBuilder("select * from users where ");
+        StringBuilder query = new StringBuilder("select * from users ");
         List<Object> parameterList = new ArrayList<>();
 
-        if(criteriaModel.getId() != null){
-            query.append("id = ? ");
-            parameterList.add(criteriaModel.getId());
-        }
-        if(criteriaModel.getName() != null){
-            if(!parameterList.isEmpty()){
-                query.append(" and ");
+        if(criteriaModel != null){
+            query.append("where ");
+            if(criteriaModel.getId() != null){
+                query.append("id = ? ");
+                parameterList.add(criteriaModel.getId());
             }
-            query.append("name = ? ");
-            parameterList.add(criteriaModel.getName());
-        }
-        if(criteriaModel.getSurname() != null){
-            if(!parameterList.isEmpty()){
-                query.append(" and ");
+            if(criteriaModel.getName() != null){
+                if(!parameterList.isEmpty()){
+                    query.append(" and ");
+                }
+                query.append("name = ? ");
+                parameterList.add(criteriaModel.getName());
             }
-            query.append("surname = ? ");
-            parameterList.add(criteriaModel.getSurname());
-        }
-        if(criteriaModel.getFather_name() != null){
-            if(!parameterList.isEmpty()){
-                query.append(" and ");
+            if(criteriaModel.getSurname() != null){
+                if(!parameterList.isEmpty()){
+                    query.append(" and ");
+                }
+                query.append("surname = ? ");
+                parameterList.add(criteriaModel.getSurname());
             }
-            query.append("father_name = ? ");
-            parameterList.add(criteriaModel.getFather_name());
-        }
-        if(criteriaModel.getDob() != null){
-            if(!parameterList.isEmpty()){
-                query.append(" and ");
+            if(criteriaModel.getFather_name() != null){
+                if(!parameterList.isEmpty()){
+                    query.append(" and ");
+                }
+                query.append("father_name = ? ");
+                parameterList.add(criteriaModel.getFather_name());
             }
-            query.append("dob = ? ");
-            parameterList.add(criteriaModel.getDob());
-        }
-        if(criteriaModel.getSex() != null){
-            if(!parameterList.isEmpty()){
-                query.append(" and ");
+            if(criteriaModel.getDob() != null){
+                if(!parameterList.isEmpty()){
+                    query.append(" and ");
+                }
+                query.append("dob = ? ");
+                parameterList.add(criteriaModel.getDob());
             }
-            query.append("sex = ?");
-            parameterList.add(criteriaModel.getSex());
+            if(criteriaModel.getSex() != null){
+                if(!parameterList.isEmpty()){
+                    query.append(" and ");
+                }
+                query.append("sex = ?");
+                parameterList.add(criteriaModel.getSex());
+            }
         }
 
         try(Connection connection = databaseConnector.getConnection();
@@ -168,7 +171,6 @@ public class UserSQLRepository implements CrudRepository<User> {
 
                     resultList.add(new User(id, name, surname, father_name, dob, sex));
                 }
-                resultSet.close();
                 return resultList;
             }
 

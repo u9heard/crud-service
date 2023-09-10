@@ -93,19 +93,22 @@ public class VolumeSQLRepository implements CrudRepository<Volume> {
 
     @Override
     public List<Volume> query(Volume criteriaModel) {
-        StringBuilder query = new StringBuilder("select * from volume where ");
+        StringBuilder query = new StringBuilder("select * from volume ");
         List<Object> parameterList = new ArrayList<>();
 
-        if(criteriaModel.getId() != null){
-            query.append("id = ? ");
-            parameterList.add(criteriaModel.getId());
-        }
-        if(criteriaModel.getVolume() != null){
-            if(!parameterList.isEmpty()){
-                query.append(" and ");
+        if(criteriaModel != null) {
+            query.append("where ");
+            if (criteriaModel.getId() != null) {
+                query.append("id = ? ");
+                parameterList.add(criteriaModel.getId());
             }
-            query.append("vol = ? ");
-            parameterList.add(criteriaModel.getVolume());
+            if (criteriaModel.getVolume() != null) {
+                if (!parameterList.isEmpty()) {
+                    query.append(" and ");
+                }
+                query.append("vol = ? ");
+                parameterList.add(criteriaModel.getVolume());
+            }
         }
 
 

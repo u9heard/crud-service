@@ -104,26 +104,29 @@ public class CarColorSQLRepository implements CrudRepository<CarColor> {
 
     @Override
     public List<CarColor> query(CarColor criteriaModel) {
-        StringBuilder query = new StringBuilder("select * from car_color where ");
+        StringBuilder query = new StringBuilder("select * from car_color ");
         List<Object> parameterList = new ArrayList<>();
 
-        if(criteriaModel.getId() != null){
-            query.append("id = ? ");
-            parameterList.add(criteriaModel.getId());
-        }
-        if(criteriaModel.getIdCar() != null){
-            if(!parameterList.isEmpty()){
-                query.append(" and ");
+        if(criteriaModel != null) {
+            query.append("where ");
+            if (criteriaModel.getId() != null) {
+                query.append("id = ? ");
+                parameterList.add(criteriaModel.getId());
             }
-            query.append("id_car = ? ");
-            parameterList.add(criteriaModel.getIdCar());
-        }
-        if(criteriaModel.getIdColor() != null){
-            if(!parameterList.isEmpty()){
-                query.append(" and ");
+            if (criteriaModel.getIdCar() != null) {
+                if (!parameterList.isEmpty()) {
+                    query.append(" and ");
+                }
+                query.append("id_car = ? ");
+                parameterList.add(criteriaModel.getIdCar());
             }
-            query.append("id_color = ?");
-            parameterList.add(criteriaModel.getIdColor());
+            if (criteriaModel.getIdColor() != null) {
+                if (!parameterList.isEmpty()) {
+                    query.append(" and ");
+                }
+                query.append("id_color = ?");
+                parameterList.add(criteriaModel.getIdColor());
+            }
         }
 
         try(Connection connection = databaseConnector.getConnection();

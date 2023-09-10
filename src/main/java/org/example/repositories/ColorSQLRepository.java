@@ -35,8 +35,6 @@ public class ColorSQLRepository implements CrudRepository<Color> {
             preparedStatement.setString(1, object.getColor());
             preparedStatement.executeUpdate();
 
-            preparedStatement.executeUpdate();
-
             try (ResultSet resultSet = preparedStatement.getGeneratedKeys()){
                 if(resultSet.next()){
                     object.setId(resultSet.getLong(1));
@@ -94,19 +92,22 @@ public class ColorSQLRepository implements CrudRepository<Color> {
 
     @Override
     public List<Color> query(Color criteriaModel) {
-        StringBuilder query = new StringBuilder("select * from color where ");
+        StringBuilder query = new StringBuilder("select * from color ");
         List<Object> parameterList = new ArrayList<>();
 
-        if(criteriaModel.getId() != null){
-            query.append("id = ? ");
-            parameterList.add(criteriaModel.getId());
-        }
-        if(criteriaModel.getColor() != null){
-            if(!parameterList.isEmpty()){
-                query.append(" and ");
+        if(criteriaModel != null) {
+            query.append("where ");
+            if (criteriaModel.getId() != null) {
+                query.append("id = ? ");
+                parameterList.add(criteriaModel.getId());
             }
-            query.append("color = ?");
-            parameterList.add(criteriaModel.getColor());
+            if (criteriaModel.getColor() != null) {
+                if (!parameterList.isEmpty()) {
+                    query.append(" and ");
+                }
+                query.append("color = ?");
+                parameterList.add(criteriaModel.getColor());
+            }
         }
 
         try(Connection connection = databaseConnector.getConnection();
@@ -124,7 +125,6 @@ public class ColorSQLRepository implements CrudRepository<Color> {
 
                     resultList.add(new Color(id, color));
                 }
-                resultSet.close();
                 return resultList;
             }
 

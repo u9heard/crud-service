@@ -32,7 +32,7 @@ public class CarColorServlet extends HttpServlet {
         this.carColorModelParser = (ModelParser<CarColor>) getServletContext().getAttribute("carcolorParser");
         this.carColorStorageService = (CarColorService) getServletContext().getAttribute("carcolorService");
         this.MODEL_NAME = "colors";
-        this.requestHandler = new RequestHandler<>(carColorStorageService, carColorModelParser, carColorModelValidator, MODEL_NAME, new ManyModelsToJson<>());
+        this.requestHandler = new RequestHandler<>(carColorStorageService, carColorModelParser, carColorModelValidator, MODEL_NAME);
     }
 
     @Override

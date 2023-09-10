@@ -23,45 +23,38 @@ public class RequestHandler<T> {
     protected final ModelParser<T> modelParser;
     protected final ModelValidator<T> modelValidator;
     protected final String MODEL_NAME;
-    private final ConvertModelStrategy<T> convertModelStrategy;
 
 
-    public RequestHandler(StorageService<T> storageService, ModelParser<T> modelParser, ModelValidator<T> modelValidator, String MODEL_NAME, ConvertModelStrategy<T> convertModelStrategy) {
+    public RequestHandler(StorageService<T> storageService, ModelParser<T> modelParser, ModelValidator<T> modelValidator, String MODEL_NAME) {
         this.storageService = storageService;
         this.modelParser = modelParser;
         this.modelValidator = modelValidator;
         this.MODEL_NAME = MODEL_NAME;
-        this.convertModelStrategy = convertModelStrategy;
     }
 
     public void handleGet(HttpServletRequest req, HttpServletResponse resp){
         resp.setContentType("application/json");
         List<T> resultList = getModelByRequest(req);
         String jsonResponse = getJsonOnGet(resultList);
-        setResponse(resp, jsonResponse);
+        setResponse(resp, jsonResponse, HttpServletResponse.SC_OK);
     }
 
     public void handlePost(HttpServletRequest req, HttpServletResponse resp){
         resp.setContentType("application/json");
         T model = getModelFromRequestBody(req);
-        if(!modelValidator.validateOnInsert(model)){
-            throw new ModelNotFullException("Model not full");
-        }
+        modelValidator.validateOnInsert(model);
         storageService.add(model);
         String respJson = getJsonOnUpdate(model);
-        setResponse(resp, respJson);
-        resp.setStatus(HttpServletResponse.SC_CREATED);
+        setResponse(resp, respJson, HttpServletResponse.SC_CREATED);
     }
 
     public void handlePut(HttpServletRequest req, HttpServletResponse resp){
         resp.setContentType("application/json");
         T model = getModelFromRequestBody(req);
-        if(!modelValidator.validateOnUpdate(model)){
-            throw new ModelNotFullException("Model not full");
-        }
+        modelValidator.validateOnUpdate(model);
         String respJson = getJsonOnUpdate(model);
         storageService.update(model);
-        setResponse(resp, respJson);
+        setResponse(resp, respJson, HttpServletResponse.SC_OK);
     }
 
     public void handleDelete(HttpServletRequest req, HttpServletResponse resp){
@@ -83,10 +76,16 @@ public class RequestHandler<T> {
 
     protected List<T> getModelByRequest(HttpServletRequest req){
         LongPathParser pathParser = new LongPathParser();
-        Long id = pathParser.parsePath(req.getPathInfo(), 1);
-        List<T> result = new ArrayList<>();
-        result.add(this.storageService.getById(id));
-        return result;
+        if(req.getPathInfo() != null) {
+            Long id = pathParser.parsePath(req.getPathInfo(), 1);
+            List<T> result = new ArrayList<>();
+            result.add(this.storageService.getById(id));
+            return result;
+        }
+        else{
+            return this.storageService.getAll();
+        }
+
     }
 
     protected String getJsonOnUpdate(T model){
@@ -94,11 +93,12 @@ public class RequestHandler<T> {
     }
 
     protected String getJsonOnGet(List<T> resultList){
-        return convertModelStrategy.execute(resultList, MODEL_NAME, modelParser);
+        return modelParser.toJSON(Map.of(MODEL_NAME, resultList));
     }
 
-    protected void setResponse(HttpServletResponse response, String message){
+    protected void setResponse(HttpServletResponse response, String message, int responseCode){
         try(PrintWriter writer = response.getWriter()){
+            response.setStatus(responseCode);
             writer.write(message);
         } catch (IOException e) {
             throw new ResponseWriterException("Unable to get Writer");

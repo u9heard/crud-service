@@ -31,7 +31,7 @@ public class CatalogServlet extends HttpServlet {
         this.catalogModelParser = (ModelParser<Catalog>) getServletContext().getAttribute("catalogParser");
         this.catalogStorageService = (CatalogService) getServletContext().getAttribute("catalogService");
         this.MODEL_NAME = "catalog";
-        this.catalogRequestHandler = new RequestHandler<>(catalogStorageService, catalogModelParser, catalogModelValidator, MODEL_NAME, new OneModelToJson<>());
+        this.catalogRequestHandler = new RequestHandler<>(catalogStorageService, catalogModelParser, catalogModelValidator, MODEL_NAME);
     }
 
     @Override

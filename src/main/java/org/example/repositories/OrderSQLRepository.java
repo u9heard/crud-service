@@ -35,11 +35,19 @@ public class OrderSQLRepository implements CrudRepository<Order> {
             preparedStatement.setLong(2, object.getIdCar());
             preparedStatement.setLong(3, object.getIdColor());
             preparedStatement.setLong(4, object.getIdVolume());
-            preparedStatement.setDate(5, new Date(object.getDateBuy().toEpochDay()));
+            preparedStatement.setDate(5, Date.valueOf(object.getDateBuy()));
 
             preparedStatement.executeUpdate();
 
-            object.setId(preparedStatement.getGeneratedKeys().getLong(1));
+            try(ResultSet resultSet = preparedStatement.getGeneratedKeys()){
+                if(resultSet.next()){
+                    object.setId(resultSet.getLong(1));
+                }
+                else{
+                    throw new DatabaseSaveException(String.format("The request was completed but no data was returned: %s", preparedStatement.toString()));
+                }
+            }
+
         } catch (SQLException e) {
             e.printStackTrace();
             throw new DatabaseSaveException(e.getMessage());
@@ -64,7 +72,7 @@ public class OrderSQLRepository implements CrudRepository<Order> {
             statement.setLong(2, object.getIdCar());
             statement.setLong(3, object.getIdColor());
             statement.setLong(4, object.getIdVolume());
-            statement.setDate(5, new Date(object.getDateBuy().toEpochDay()));
+            statement.setDate(5, Date.valueOf(object.getDateBuy()));
             statement.setLong(6, object.getId());
 
             statement.executeUpdate();
@@ -97,42 +105,44 @@ public class OrderSQLRepository implements CrudRepository<Order> {
 
     @Override
     public List<Order> query(Order criteriaModel) {
-        StringBuilder query = new StringBuilder("select * from orders where ");
+        StringBuilder query = new StringBuilder("select * from orders ");
         List<Object> parameterList = new ArrayList<>();
 
-        if(criteriaModel.getId() != null){
-            query.append("id = ? ");
-            parameterList.add(criteriaModel.getId());
-        }
-        if(criteriaModel.getIdCar() != null){
-            if(!parameterList.isEmpty()){
-                query.append(" and ");
+        if(criteriaModel != null) {
+            query.append("where ");
+            if (criteriaModel.getId() != null) {
+                query.append("id = ? ");
+                parameterList.add(criteriaModel.getId());
             }
-            query.append("id_car = ? ");
-            parameterList.add(criteriaModel.getIdCar());
-        }
-        if(criteriaModel.getIdUser() != null){
-            if(!parameterList.isEmpty()){
-                query.append(" and ");
+            if (criteriaModel.getIdCar() != null) {
+                if (!parameterList.isEmpty()) {
+                    query.append(" and ");
+                }
+                query.append("id_car = ? ");
+                parameterList.add(criteriaModel.getIdCar());
             }
-            query.append("id_user = ? ");
-            parameterList.add(criteriaModel.getIdUser());
-        }
-        if(criteriaModel.getIdColor() != null){
-            if(!parameterList.isEmpty()){
-                query.append(" and ");
+            if (criteriaModel.getIdUser() != null) {
+                if (!parameterList.isEmpty()) {
+                    query.append(" and ");
+                }
+                query.append("id_user = ? ");
+                parameterList.add(criteriaModel.getIdUser());
             }
-            query.append("id_color = ? ");
-            parameterList.add(criteriaModel.getIdColor());
-        }
-        if(criteriaModel.getIdVolume() != null){
-            if(!parameterList.isEmpty()){
-                query.append(" and ");
+            if (criteriaModel.getIdColor() != null) {
+                if (!parameterList.isEmpty()) {
+                    query.append(" and ");
+                }
+                query.append("id_color = ? ");
+                parameterList.add(criteriaModel.getIdColor());
             }
-            query.append("id_volume = ? ");
-            parameterList.add(criteriaModel.getIdVolume());
+            if (criteriaModel.getIdVolume() != null) {
+                if (!parameterList.isEmpty()) {
+                    query.append(" and ");
+                }
+                query.append("id_volume = ? ");
+                parameterList.add(criteriaModel.getIdVolume());
+            }
         }
-
 
         try(Connection connection = databaseConnector.getConnection();
             PreparedStatement statement = connection.prepareStatement(query.toString())) {

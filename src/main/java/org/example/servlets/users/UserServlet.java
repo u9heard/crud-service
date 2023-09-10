@@ -32,8 +32,8 @@ public class UserServlet extends HttpServlet {
         this.userModelValidator = (UserValidator) getServletContext().getAttribute("userValidator");
         this.userModelParser = (ModelParser<User>) getServletContext().getAttribute("userParser");
         this.userStorageService = (UserService) getServletContext().getAttribute("userService");
-        this.MODEL_NAME = "user";
-        this.requestHandler = new RequestHandler<>(userStorageService, userModelParser, userModelValidator, MODEL_NAME, new OneModelToJson<>());
+        this.MODEL_NAME = "users";
+        this.requestHandler = new RequestHandler<>(userStorageService, userModelParser, userModelValidator, MODEL_NAME);
     }
 
     @Override

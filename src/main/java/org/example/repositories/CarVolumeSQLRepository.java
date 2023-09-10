@@ -109,26 +109,29 @@ public class CarVolumeSQLRepository implements CrudRepository<CarVolume> {
 
     @Override
     public List<CarVolume> query(CarVolume criteriaModel) {
-        StringBuilder query = new StringBuilder("select * from car_volume where ");
+        StringBuilder query = new StringBuilder("select * from car_volume ");
         List<Object> parametersList = new ArrayList<>();
 
-        if(criteriaModel.getId() != null){
-            query.append("id = ? ");
-            parametersList.add(criteriaModel.getId());
-        }
-        if(criteriaModel.getIdCar() != null){
-            if(!parametersList.isEmpty()){
-                query.append(" and ");
+        if(criteriaModel != null) {
+            query.append("where ");
+            if (criteriaModel.getId() != null) {
+                query.append("id = ? ");
+                parametersList.add(criteriaModel.getId());
             }
-            query.append("id_car = ? ");
-            parametersList.add(criteriaModel.getIdCar());
-        }
-        if(criteriaModel.getIdVolume() != null){
-            if(!parametersList.isEmpty()){
-                query.append(" and ");
+            if (criteriaModel.getIdCar() != null) {
+                if (!parametersList.isEmpty()) {
+                    query.append(" and ");
+                }
+                query.append("id_car = ? ");
+                parametersList.add(criteriaModel.getIdCar());
             }
-            query.append("id_volume = ?");
-            parametersList.add(criteriaModel.getIdVolume());
+            if (criteriaModel.getIdVolume() != null) {
+                if (!parametersList.isEmpty()) {
+                    query.append(" and ");
+                }
+                query.append("id_volume = ?");
+                parametersList.add(criteriaModel.getIdVolume());
+            }
         }
 
         try(Connection connection = databaseConnector.getConnection();

@@ -25,4 +25,8 @@ public abstract class StorageService<T> {
         }
         return resultModel;
     }
+
+    public List<T> getAll(){
+        return this.modelRepository.query(null);
+    }
 }

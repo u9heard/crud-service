@@ -103,40 +103,43 @@ public class CatalogSQLRepository implements CrudRepository<Catalog> {
 
     @Override
     public List<Catalog> query(Catalog criteriaModel) {
-        StringBuilder query = new StringBuilder("select * from catalog where ");
+        StringBuilder query = new StringBuilder("select * from catalog ");
         List<Object> parameterList = new ArrayList<>();
 
-        if(criteriaModel.getId() != null){
-            query.append("id = ? ");
-            parameterList.add(criteriaModel.getId());
-        }
-        if(criteriaModel.getBrand() != null){
-            if(!parameterList.isEmpty()){
-                query.append(" and ");
+        if(criteriaModel != null) {
+            query.append("where ");
+            if (criteriaModel.getId() != null) {
+                query.append("id = ? ");
+                parameterList.add(criteriaModel.getId());
             }
-            query.append("brand = ? ");
-            parameterList.add(criteriaModel.getBrand());
-        }
-        if(criteriaModel.getModel() != null){
-            if(!parameterList.isEmpty()){
-                query.append(" and ");
+            if (criteriaModel.getBrand() != null) {
+                if (!parameterList.isEmpty()) {
+                    query.append(" and ");
+                }
+                query.append("brand = ? ");
+                parameterList.add(criteriaModel.getBrand());
             }
-            query.append("model = ? ");
-            parameterList.add(criteriaModel.getModel());
-        }
-        if(criteriaModel.getRelease_date() != null){
-            if(!parameterList.isEmpty()){
-                query.append(" and ");
+            if (criteriaModel.getModel() != null) {
+                if (!parameterList.isEmpty()) {
+                    query.append(" and ");
+                }
+                query.append("model = ? ");
+                parameterList.add(criteriaModel.getModel());
             }
-            query.append("release_date = ? ");
-            parameterList.add(criteriaModel.getRelease_date());
-        }
-        if(criteriaModel.getPrice() != null ){
-            if(!parameterList.isEmpty()){
-                query.append(" and ");
+            if (criteriaModel.getRelease_date() != null) {
+                if (!parameterList.isEmpty()) {
+                    query.append(" and ");
+                }
+                query.append("release_date = ? ");
+                parameterList.add(criteriaModel.getRelease_date());
             }
-            query.append("price = ?");
-            parameterList.add(criteriaModel.getPrice());
+            if (criteriaModel.getPrice() != null) {
+                if (!parameterList.isEmpty()) {
+                    query.append(" and ");
+                }
+                query.append("price = ?");
+                parameterList.add(criteriaModel.getPrice());
+            }
         }
 
         try(Connection connection = databaseConnector.getConnection();
@@ -145,8 +148,6 @@ public class CatalogSQLRepository implements CrudRepository<Catalog> {
             for(int i=0; i<parameterList.size(); i++){
                 statement.setObject(i+1, parameterList.get(i));
             }
-
-            System.out.println(statement.toString());
 
             try(ResultSet resultSet = statement.executeQuery()) {
                 List<Catalog> resultList = new ArrayList<>();

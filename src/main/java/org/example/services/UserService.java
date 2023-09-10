@@ -21,7 +21,9 @@ public class UserService extends StorageService<User> {
     }
 
     void checkIfExists(User model){
-        if(this.modelRepository.query(model).isEmpty()){
+        User userSearch = new User();
+        userSearch.setId(model.getId());
+        if(this.modelRepository.query(userSearch).isEmpty()){
             throw new ModelNotFoundException(String.format("User not found, id = %s", model.getId()));
         }
     }

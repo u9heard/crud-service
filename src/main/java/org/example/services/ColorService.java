@@ -34,8 +34,11 @@ public class ColorService extends StorageService<Color> {
     }
 
     private void checkColor(Color color){
-       if(!this.modelRepository.query(color).isEmpty()){
+        Color searchColor = new Color();
+        searchColor.setColor(color.getColor());
+        System.out.println("Check Color");
+        if(!this.modelRepository.query(searchColor).isEmpty()){
            throw new ModelConflictException("Color already exists");
-       }
+        }
     }
 }

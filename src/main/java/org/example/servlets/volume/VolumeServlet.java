@@ -29,8 +29,8 @@ public class VolumeServlet extends HttpServlet {
         this.volumeModelValidator = (VolumeValidator) getServletContext().getAttribute("volumeValidator");
         this.volumeModelParser = (ModelParser<Volume>) getServletContext().getAttribute("volumeParser");
         this.volumeStorageService = (VolumeService) getServletContext().getAttribute("volumeService");
-        this.MODEL_NAME = "volume";
-        this.requestHandler = new RequestHandler<>(volumeStorageService, volumeModelParser, volumeModelValidator, MODEL_NAME, new OneModelToJson<>());
+        this.MODEL_NAME = "volumes";
+        this.requestHandler = new RequestHandler<>(volumeStorageService, volumeModelParser, volumeModelValidator, MODEL_NAME);
     }
 
     @Override

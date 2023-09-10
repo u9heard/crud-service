@@ -15,15 +15,14 @@ public class CatalogService extends StorageService<Catalog> {
     }
 
     public void add(Catalog catalog){
-        checkUniqueOnInsert(catalog.getBrand(), catalog.getModel());
+        checkUnique(catalog.getBrand(), catalog.getModel());
         this.modelRepository.save(catalog);
     }
 
     public void update(Catalog catalog){
         checkIfExists(catalog);
-        checkUniqueOnUpdate(catalog.getId(), catalog.getBrand(), catalog.getModel());
+        checkUnique(catalog.getBrand(), catalog.getModel());
         this.modelRepository.update(catalog);
-
     }
 
     public List<Catalog> getByBrand(String brand){
@@ -44,18 +43,8 @@ public class CatalogService extends StorageService<Catalog> {
         }
     }
 
-    private void checkUniqueOnInsert(String brand, String model){
+    private void checkUnique(String brand, String model){
         Catalog searchCatalog = new Catalog();
-        searchCatalog.setBrand(brand);
-        searchCatalog.setModel(model);
-        if (!this.modelRepository.query(searchCatalog).isEmpty()){
-            throw new ModelConflictException("Car already exists");
-        }
-    }
-
-    private void checkUniqueOnUpdate(Long id, String brand, String model){
-        Catalog searchCatalog = new Catalog();
-        searchCatalog.setId(id);
         searchCatalog.setBrand(brand);
         searchCatalog.setModel(model);
         if (!this.modelRepository.query(searchCatalog).isEmpty()){

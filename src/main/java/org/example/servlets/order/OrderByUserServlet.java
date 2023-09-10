@@ -1,4 +1,4 @@
-package org.example.servlets.catalog;
+package org.example.servlets.order;
 
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
@@ -6,39 +6,41 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.exceptions.MethodNotAllowedException;
-import org.example.handlers.CatalogByBrandRequestHandler;
+import org.example.handlers.OrderByUserRequestHandler;
+import org.example.handlers.RequestHandler;
 import org.example.handlers.strategy.ManyModelsToJson;
+import org.example.handlers.strategy.OneModelToJson;
 import org.example.interfaces.ModelParser;
 import org.example.interfaces.ModelValidator;
+import org.example.models.Order;
+import org.example.services.OrderService;
 import org.example.services.StorageService;
-import org.example.models.Catalog;
-import org.example.services.CatalogService;
-import org.example.handlers.RequestHandler;
-import org.example.validators.CatalogValidator;
+import org.example.validators.OrderValidator;
 
 import java.io.IOException;
 
-public class CatalogByBrandServlet extends HttpServlet {
+public class OrderByUserServlet extends HttpServlet {
 
-    private StorageService<Catalog> catalogStorageService;
-    private ModelParser<Catalog> catalogModelParser;
-    private ModelValidator<Catalog> catalogModelValidator;
+    private StorageService<Order> orderStorageService;
+    private ModelParser<Order> orderModelParser;
+    private ModelValidator<Order> orderModelValidator;
     private String MODEL_NAME;
-    private RequestHandler<Catalog> catalogRequestHandler;
+
+    private RequestHandler<Order> requestHandler;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        this.catalogModelValidator = (CatalogValidator) getServletContext().getAttribute("catalogValidator");
-        this.catalogModelParser = (ModelParser<Catalog>) getServletContext().getAttribute("catalogParser");
-        this.catalogStorageService = (CatalogService) getServletContext().getAttribute("catalogService");
-        this.MODEL_NAME = "catalogs";
-        this.catalogRequestHandler = new CatalogByBrandRequestHandler(catalogStorageService, catalogModelParser, catalogModelValidator, MODEL_NAME);
+        this.orderModelValidator = (OrderValidator) getServletContext().getAttribute("orderValidator");
+        this.orderModelParser = (ModelParser<Order>) getServletContext().getAttribute("orderParser");
+        this.orderStorageService = (OrderService) getServletContext().getAttribute("orderService");
+        this.MODEL_NAME = "orders";
+        this.requestHandler = new OrderByUserRequestHandler(orderStorageService, orderModelParser, orderModelValidator, MODEL_NAME);
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        this.catalogRequestHandler.handleGet(req, resp);
+        requestHandler.handleGet(req, resp);
     }
 
     @Override

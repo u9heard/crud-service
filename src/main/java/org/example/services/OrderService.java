@@ -38,6 +38,16 @@ public class OrderService extends StorageService<Order> {
         this.modelRepository.update(order);
     }
 
+    public List<Order> getByUserId(Long id){
+        Order searchModel = new Order();
+        searchModel.setIdUser(id);
+        List<Order> resultList = this.modelRepository.query(searchModel);
+        if(resultList.isEmpty()){
+            throw new ModelNotFoundException("No such orders with user id = " + id.toString());
+        }
+        return resultList;
+    }
+
     private void checkUser(Long id){
         User searchUser = new User();
         searchUser.setId(id);

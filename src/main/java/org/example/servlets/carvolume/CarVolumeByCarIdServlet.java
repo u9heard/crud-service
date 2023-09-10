@@ -6,7 +6,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.exceptions.MethodNotAllowedException;
-import org.example.handlers.CarVolumeRequestHandler;
+import org.example.handlers.CarVolumeByCarRequestHandler;
 import org.example.handlers.RequestHandler;
 import org.example.handlers.strategy.ManyModelsToJson;
 import org.example.interfaces.ModelParser;
@@ -32,7 +32,7 @@ public class CarVolumeByCarIdServlet extends HttpServlet {
         this.carVolumeModelParser = (ModelParser<CarVolume>) getServletContext().getAttribute("carvolumeParser");
         this.carVolumeStorageService = (CarVolumeService) getServletContext().getAttribute("carvolumeService");
         this.MODEL_NAME = "volumes";
-        this.carVolumeRequestHandler = new CarVolumeRequestHandler(carVolumeStorageService, carVolumeModelParser, carVolumeModelValidator, MODEL_NAME, new ManyModelsToJson<>());
+        this.carVolumeRequestHandler = new CarVolumeByCarRequestHandler(carVolumeStorageService, carVolumeModelParser, carVolumeModelValidator, MODEL_NAME);
     }
 
     @Override
