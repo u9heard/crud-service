@@ -1,11 +1,11 @@
 package org.example.filters;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.exceptions.EmptyJsonException;
 import org.example.exceptions.MethodNotAllowedException;
 import org.example.exceptions.ModelNotFullException;
+import org.example.exceptions.ResponseWriterException;
 import org.example.exceptions.parsers.JsonParseException;
 import org.example.exceptions.parsers.ParametersParseException;
 import org.example.exceptions.parsers.PathParseException;
@@ -13,7 +13,6 @@ import org.example.exceptions.database.access.DatabaseDeleteException;
 import org.example.exceptions.database.access.DatabaseReadException;
 import org.example.exceptions.database.access.DatabaseSaveException;
 import org.example.exceptions.database.access.DatabaseUpdateException;
-import org.example.exceptions.database.service.DatabaseServiceException;
 import org.example.exceptions.database.service.ModelConflictException;
 import org.example.exceptions.database.service.ModelNotFoundException;
 import org.example.responses.JsonMessageResponse;
@@ -25,7 +24,6 @@ public class ExceptionsFilter implements Filter {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletResponse response = null;
-        PrintWriter writer;
         if(servletResponse instanceof HttpServletResponse){
             response = (HttpServletResponse) servletResponse;
             response.setContentType("application/json");
@@ -34,13 +32,13 @@ public class ExceptionsFilter implements Filter {
             filterChain.doFilter(servletRequest, servletResponse);
         }
 
-        writer = response.getWriter();
+        PrintWriter writer = response.getWriter();
 
         try{
             filterChain.doFilter(servletRequest, servletResponse);
-        } catch (UnsupportedOperationException | ServletException | IOException e) {
+        } catch (ResponseWriterException | ServletException | IOException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        } catch (JsonParseException | ModelNotFullException | EmptyJsonException | ParametersParseException | PathParseException | DatabaseServiceException e){
+        } catch (JsonParseException | ModelNotFullException | EmptyJsonException | ParametersParseException | PathParseException e){
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             writer.write(JsonMessageResponse.getJsonMessage(e.getMessage()));
         } catch (ModelConflictException e){
@@ -54,6 +52,7 @@ public class ExceptionsFilter implements Filter {
             writer.write(JsonMessageResponse.getJsonMessage(e.getMessage()));
         } catch (DatabaseSaveException | DatabaseReadException | DatabaseDeleteException | DatabaseUpdateException e){
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            System.out.println(e.getMessage());
             writer.write(JsonMessageResponse.getJsonMessage("Internal server error"));
         } finally {
             writer.close();

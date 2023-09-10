@@ -30,13 +30,20 @@ public class VolumeSQLRepository implements CrudRepository<Volume> {
                        """;
 
         try(Connection connection = databaseConnector.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            PreparedStatement preparedStatement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 
             preparedStatement.setDouble(1, object.getVolume());
 
             preparedStatement.executeUpdate();
 
-
+            try (ResultSet resultSet = preparedStatement.getGeneratedKeys()){
+                if(resultSet.next()){
+                    object.setId(resultSet.getLong(1));
+                }
+                else{
+                    throw new DatabaseSaveException(String.format("The request was completed but no data was returned: %s", preparedStatement.toString()));
+                }
+            }
         } catch (SQLException e) {
             e.printStackTrace();
             throw new DatabaseSaveException(e.getMessage());
@@ -57,7 +64,6 @@ public class VolumeSQLRepository implements CrudRepository<Volume> {
             statement.setLong(2, object.getId());
 
             statement.executeUpdate();
-
         } catch (SQLException e) {
             e.printStackTrace();
             throw new DatabaseUpdateException(e.getMessage());

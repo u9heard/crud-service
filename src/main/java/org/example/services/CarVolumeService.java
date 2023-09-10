@@ -28,6 +28,7 @@ public class CarVolumeService extends StorageService<CarVolume> {
     }
 
     public void update(CarVolume carVolume){
+        checkIfExists(carVolume);
         checkVolume(carVolume.getIdVolume());
         checkCatalog(carVolume.getIdCar());
         this.modelRepository.update(carVolume);
@@ -67,6 +68,14 @@ public class CarVolumeService extends StorageService<CarVolume> {
         searchVolume.setId(id);
         if(this.volumeRepository.query(searchVolume).isEmpty()){
             throw new ModelNotFoundException("Volume not found");
+        }
+    }
+
+    private void checkIfExists(CarVolume color){
+        CarVolume searchVolume = new CarVolume();
+        searchVolume.setId(color.getId());
+        if(this.modelRepository.query(searchVolume).isEmpty()){
+            throw new ModelNotFoundException(String.format("Volume for car not found, id = %s", searchVolume.getId()));
         }
     }
 }

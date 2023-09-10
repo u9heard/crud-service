@@ -3,6 +3,7 @@ package org.example.handlers;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.exceptions.ModelNotFullException;
+import org.example.exceptions.ResponseWriterException;
 import org.example.interfaces.ConvertModelStrategy;
 import org.example.interfaces.ModelParser;
 import org.example.interfaces.ModelValidator;
@@ -14,6 +15,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class RequestHandler<T> {
 
@@ -35,12 +37,8 @@ public class RequestHandler<T> {
     public void handleGet(HttpServletRequest req, HttpServletResponse resp){
         resp.setContentType("application/json");
         List<T> resultList = getModelByRequest(req);
-        String jsonResponse = getJson(resultList);
-        try(PrintWriter writer = resp.getWriter()) {
-            writer.write(jsonResponse);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        String jsonResponse = getJsonOnGet(resultList);
+        setResponse(resp, jsonResponse);
     }
 
     public void handlePost(HttpServletRequest req, HttpServletResponse resp){
@@ -50,6 +48,8 @@ public class RequestHandler<T> {
             throw new ModelNotFullException("Model not full");
         }
         storageService.add(model);
+        String respJson = getJsonOnUpdate(model);
+        setResponse(resp, respJson);
         resp.setStatus(HttpServletResponse.SC_CREATED);
     }
 
@@ -59,7 +59,9 @@ public class RequestHandler<T> {
         if(!modelValidator.validateOnUpdate(model)){
             throw new ModelNotFullException("Model not full");
         }
+        String respJson = getJsonOnUpdate(model);
         storageService.update(model);
+        setResponse(resp, respJson);
     }
 
     public void handleDelete(HttpServletRequest req, HttpServletResponse resp){
@@ -87,7 +89,19 @@ public class RequestHandler<T> {
         return result;
     }
 
-    protected String getJson(List<T> resultList){
+    protected String getJsonOnUpdate(T model){
+        return modelParser.toJSON(Map.of(MODEL_NAME, model));
+    }
+
+    protected String getJsonOnGet(List<T> resultList){
         return convertModelStrategy.execute(resultList, MODEL_NAME, modelParser);
+    }
+
+    protected void setResponse(HttpServletResponse response, String message){
+        try(PrintWriter writer = response.getWriter()){
+            writer.write(message);
+        } catch (IOException e) {
+            throw new ResponseWriterException("Unable to get Writer");
+        }
     }
 }

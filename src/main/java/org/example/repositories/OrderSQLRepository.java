@@ -29,7 +29,7 @@ public class OrderSQLRepository implements CrudRepository<Order> {
                        """;
 
         try(Connection connection = databaseConnector.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            PreparedStatement preparedStatement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 
             preparedStatement.setLong(1, object.getIdUser());
             preparedStatement.setLong(2, object.getIdCar());
@@ -38,6 +38,8 @@ public class OrderSQLRepository implements CrudRepository<Order> {
             preparedStatement.setDate(5, new Date(object.getDateBuy().toEpochDay()));
 
             preparedStatement.executeUpdate();
+
+            object.setId(preparedStatement.getGeneratedKeys().getLong(1));
         } catch (SQLException e) {
             e.printStackTrace();
             throw new DatabaseSaveException(e.getMessage());

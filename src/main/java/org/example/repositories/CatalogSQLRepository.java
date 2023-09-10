@@ -32,7 +32,7 @@ public class CatalogSQLRepository implements CrudRepository<Catalog> {
                        """;
 
         try(Connection connection = databaseConnector.getConnection();
-            PreparedStatement statement = connection.prepareStatement(query)) {
+            PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 
             statement.setString(1, object.getBrand());
             statement.setString(2, object.getModel());
@@ -40,6 +40,15 @@ public class CatalogSQLRepository implements CrudRepository<Catalog> {
             statement.setBigDecimal(4, object.getPrice());
 
             statement.executeUpdate();
+
+            try (ResultSet resultSet = statement.getGeneratedKeys()){
+                if(resultSet.next()){
+                    object.setId(resultSet.getLong(1));
+                }
+                else{
+                    throw new DatabaseSaveException(String.format("The request was completed but no data was returned: %s", statement.toString()));
+                }
+            }
 
         } catch (SQLException e) {
             e.printStackTrace();

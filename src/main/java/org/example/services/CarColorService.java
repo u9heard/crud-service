@@ -26,6 +26,7 @@ public class CarColorService extends StorageService<CarColor> {
     }
 
     public void update(CarColor carColor){
+        checkIfExists(carColor);
         checkCatalog(carColor.getIdCar());
         checkColor(carColor.getIdColor());
         this.modelRepository.update(carColor);
@@ -65,6 +66,14 @@ public class CarColorService extends StorageService<CarColor> {
         searchColor.setId(id);
         if(this.colorRepository.query(searchColor).isEmpty()){
             throw new ModelNotFoundException("Color not found");
+        }
+    }
+
+    private void checkIfExists(CarColor carColor){
+        CarColor searchColor = new CarColor();
+        searchColor.setId(carColor.getId());
+        if(this.modelRepository.query(searchColor).isEmpty()){
+            throw new ModelNotFoundException(String.format("Color for car not found, id = %s", searchColor.getId()));
         }
     }
 }

@@ -4,6 +4,7 @@ import org.example.database.DatabaseConnector;
 import org.example.exceptions.database.access.DatabaseDeleteException;
 import org.example.exceptions.database.access.DatabaseReadException;
 import org.example.exceptions.database.access.DatabaseSaveException;
+import org.example.exceptions.database.access.DatabaseUpdateException;
 import org.example.interfaces.CrudRepository;
 import org.example.interfaces.QuerySpecification;
 import org.example.models.CarColor;
@@ -27,18 +28,36 @@ public class CarVolumeSQLRepository implements CrudRepository<CarVolume> {
 
     @Override
     public void save(CarVolume object) {
-        String query = """
+        String insertQuery = """
                        insert into car_volume(id_car, id_volume) values
                        (?, ?)
                        on conflict do nothing
                        """;
+        String selectQuery = """
+                select * from car_volume
+                where id_car = ? and id_volume = ?;
+                """;
 
         try(Connection connection = databaseConnector.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            PreparedStatement insertStatement = connection.prepareStatement(insertQuery);
+            PreparedStatement selectStatement = connection.prepareStatement(selectQuery)) {
 
-            preparedStatement.setLong(1, object.getIdCar());
-            preparedStatement.setLong(2, object.getIdVolume());
-            preparedStatement.executeUpdate();
+            connection.setAutoCommit(false);
+
+            insertStatement.setLong(1, object.getIdCar());
+            insertStatement.setLong(2, object.getIdVolume());
+            insertStatement.executeUpdate();
+
+            selectStatement.setLong(1, object.getIdCar());
+            selectStatement.setLong(2, object.getIdVolume());
+            selectStatement.executeQuery();
+
+            try(ResultSet resultSet = selectStatement.getResultSet()) {
+                if(resultSet.next()){
+                    object.setId(resultSet.getLong("id"));
+                }
+            }
+            connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
             throw new DatabaseSaveException(e.getMessage());
@@ -47,7 +66,24 @@ public class CarVolumeSQLRepository implements CrudRepository<CarVolume> {
 
     @Override
     public void update(CarVolume object) {
-        throw new UnsupportedOperationException();
+        String query = """
+                update car_volume set id_car = ?,
+                id_volume = ?
+                where id = ?
+                """;
+
+        try(Connection connection = databaseConnector.getConnection();
+            PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setLong(1, object.getIdCar());
+            statement.setLong(2, object.getIdVolume());
+            statement.setLong(3, object.getId());
+
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DatabaseUpdateException(e.getMessage());
+        }
     }
 
     @Override

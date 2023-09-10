@@ -30,6 +30,7 @@ public class OrderService extends StorageService<Order> {
     }
 
     public void update(Order order){
+        checkIfExists(order);
         checkUser(order.getIdUser());
         checkCatalog(order.getIdCar());
         checkCarColor(order.getIdCar(), order.getIdColor());
@@ -68,6 +69,14 @@ public class OrderService extends StorageService<Order> {
         searchCarVolume.setIdVolume(id_volume);
         if(this.carVolumeRepository.query(searchCarVolume).isEmpty()){
             throw new ModelNotFoundException("There is no such volume for this car");
+        }
+    }
+
+    private void checkIfExists(Order order){
+        Order searchOrder = new Order();
+        searchOrder.setId(order.getId());
+        if(this.modelRepository.query(searchOrder).isEmpty()){
+            throw new ModelNotFoundException(String.format("Order not found, id = %s", searchOrder.getId()));
         }
     }
 }

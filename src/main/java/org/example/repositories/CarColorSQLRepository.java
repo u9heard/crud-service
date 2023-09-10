@@ -4,6 +4,7 @@ import org.example.database.DatabaseConnector;
 import org.example.exceptions.database.access.DatabaseDeleteException;
 import org.example.exceptions.database.access.DatabaseReadException;
 import org.example.exceptions.database.access.DatabaseSaveException;
+import org.example.exceptions.database.access.DatabaseUpdateException;
 import org.example.interfaces.CrudRepository;
 import org.example.interfaces.QuerySpecification;
 import org.example.models.CarColor;
@@ -22,18 +23,36 @@ public class CarColorSQLRepository implements CrudRepository<CarColor> {
 
     @Override
     public void save(CarColor object) {
-        String query = """
-                       insert into car_color(id_car, id_color) values
-                       (?, ?)
-                       on conflict do nothing
-                       """;
+        String insertQuery = """
+                   insert into car_color(id_car, id_color) values
+                   (?, ?)
+                   on conflict do nothing;
+                   """;
+        String selectQuery = """
+                    select * from car_color
+                    where id_car = ? and id_color = ?;
+                    """;
 
         try(Connection connection = databaseConnector.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            PreparedStatement insertStatement = connection.prepareStatement(insertQuery);
+            PreparedStatement selectStatement = connection.prepareStatement(selectQuery)) {
 
-            preparedStatement.setLong(1, object.getIdCar());
-            preparedStatement.setLong(2, object.getIdColor());
-            preparedStatement.executeUpdate();
+            connection.setAutoCommit(false);
+
+            insertStatement.setLong(1, object.getIdCar());
+            insertStatement.setLong(2, object.getIdColor());
+            insertStatement.executeUpdate();
+
+            selectStatement.setLong(1, object.getIdCar());
+            selectStatement.setLong(2, object.getIdColor());
+            selectStatement.executeQuery();
+
+            try(ResultSet resultSet = selectStatement.getResultSet()) {
+                if(resultSet.next()){
+                    object.setId(resultSet.getLong("id"));
+                }
+            }
+            connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
             throw new DatabaseSaveException(e.getMessage());
@@ -42,7 +61,24 @@ public class CarColorSQLRepository implements CrudRepository<CarColor> {
 
     @Override
     public void update(CarColor object) {
-        throw new UnsupportedOperationException();
+        String query = """
+                update car_color set id_car = ?,
+                id_color = ?
+                where id = ?
+                """;
+
+        try(Connection connection = databaseConnector.getConnection();
+            PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setLong(1, object.getIdCar());
+            statement.setLong(2, object.getIdColor());
+            statement.setLong(3, object.getId());
+
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DatabaseUpdateException(e.getMessage());
+        }
     }
 
     @Override

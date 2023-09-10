@@ -1,5 +1,6 @@
 package org.example.services;
 
+import org.example.exceptions.ModelNotFullException;
 import org.example.exceptions.database.service.ModelConflictException;
 import org.example.exceptions.database.service.ModelNotFoundException;
 import org.example.interfaces.CrudRepository;
@@ -19,6 +20,7 @@ public class CatalogService extends StorageService<Catalog> {
     }
 
     public void update(Catalog catalog){
+        checkIfExists(catalog);
         checkUniqueOnUpdate(catalog.getId(), catalog.getBrand(), catalog.getModel());
         this.modelRepository.update(catalog);
 
@@ -32,6 +34,14 @@ public class CatalogService extends StorageService<Catalog> {
             throw new ModelNotFoundException("Brand not found");
         }
         return result;
+    }
+
+    private void checkIfExists(Catalog catalog) {
+        Catalog searchCatalog = new Catalog();
+        searchCatalog.setId(catalog.getId());
+        if(this.modelRepository.query(searchCatalog).isEmpty()){
+            throw new ModelNotFoundException(String.format("Catalog not found, id = %s", catalog.getId()));
+        }
     }
 
     private void checkUniqueOnInsert(String brand, String model){

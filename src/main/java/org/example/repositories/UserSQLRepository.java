@@ -31,7 +31,7 @@ public class UserSQLRepository implements CrudRepository<User> {
                        """;
 
         try(Connection connection = databaseConnector.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            PreparedStatement preparedStatement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 
             preparedStatement.setString(1, object.getName());
             preparedStatement.setString(2, object.getSurname());
@@ -41,7 +41,14 @@ public class UserSQLRepository implements CrudRepository<User> {
 
             preparedStatement.executeUpdate();
 
-
+            try (ResultSet resultSet = preparedStatement.getGeneratedKeys()){
+                if(resultSet.next()){
+                    object.setId(resultSet.getLong(1));
+                }
+                else{
+                    throw new DatabaseSaveException(String.format("The request was completed but no data was returned: %s", preparedStatement.toString()));
+                }
+            }
         } catch (SQLException e) {
             e.printStackTrace();
             throw new DatabaseSaveException(e.getMessage());
@@ -70,7 +77,6 @@ public class UserSQLRepository implements CrudRepository<User> {
             statement.setLong(6, object.getId());
 
             statement.executeUpdate();
-
         } catch (SQLException e) {
             e.printStackTrace();
             throw new DatabaseUpdateException(e.getMessage());
